@@ -82,5 +82,7 @@ title('For optimization use, not for external')
 xlabel('Mass Breakdown')
 ylabel('Design R2 (AU)')
 zlabel('ISO Coverage (%)')
+colorbar
+caxis([0,16]) % fixes colorbar colors to cap at 15, gives consistent coloring regardless of plot
 end
 
