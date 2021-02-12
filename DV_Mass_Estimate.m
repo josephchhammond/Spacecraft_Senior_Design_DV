@@ -1,5 +1,5 @@
 % Created by Joey Hammond and Colton Hook
-% Function coding by Chris Larking, Christian Fuller, Miles Grave, Max McDermott
+% Function coding by Chris Larking, Christian Fuller, Miles Grove, Max McDermott
 %
 % This code and function sets evaluates a given mission concept and finds
 % the optimal mass breakdown and maximum payload operational radius to
@@ -37,11 +37,11 @@ R4D = [0, 3.63, 312, 0]; % 1 R4D system
 
 
 % prop_scheme = [preposition_DV2, departure_DV, arrival_DV]
-prop_scheme = [R4D;XR100;R4D];
+prop_scheme = [R4D;XR100_2;R4D];
 
 %size of simulation
-numR2 = 8;
-numMass = 8;
+numR2 = 7;
+numMass = 7;
 
 % Neglect for now:
 % percentages = [DVsuccess, margin, time] ---FIX
@@ -115,6 +115,14 @@ numMass = 8;
 % Refine so burn time is adjustable and we can fuel dump stages
 %% Calculations
 
+%preliminary code for itteration
+% improvement = 1;
+% maxval_prev = 0;
+% TOL = 1e-2;
+% count = 1;
+maindata = LoadWholeOrbit(orbitname,12); %load in data to matlb once
+%while improvement>TOL && count<10
+
 % Find mass in launch vehicle
 [p1,p2] = NonInstantaneousLambert(orbitname);
 [m1] = launchvehicle(preposition_DV1);
@@ -128,7 +136,7 @@ m2 = mass_array2(1);
 
 
 % Simulate a variety of proposed systems
-[DV1, DV2, DT1, DT2, R2,m_break] = propsystemsim(m2, mass_payload, power_payload, prop_scheme, R1, R_max,m_break,numR2,numMass);
+[DV1, DV2, DT1, DT2, R2,m_break_array] = propsystemsim(m2, mass_payload, power_payload, prop_scheme, R1, R_max,m_break,numR2,numMass);
 
 n = 1;
 for ii = 1:size(DV1,1)
@@ -145,14 +153,11 @@ title('Preprocessed DV Capabilities (Blind to dt)')
 
 
 % Determine success rate of each proposed system
-%   NOTES: need to verify indexing and array dimensions
-%           may need to impliment parrallel loops (over 4 minutes for 5x5 currently)
-%           need to know which variable sizes to reference for prealloaction/loop bounds
-PosNum = 0;
-tic
-PercentCoverage = zeros(numR2,numMass);
-maindata = LoadWholeOrbit(orbitname,12);
-fprintf("0%%\n")
+PosNum = 0; %set to zero means check every orbit position
+tic 
+PercentCoverage = zeros(numR2,numMass); %preallocate coverage matrix
+
+fprintf("0%%\n") %indicate loop start
 for ii = 1:size(DV1,1)
     for jj = 1:size(DV1,2)
         DV1sys = DV1(ii,jj); %pull single DV1 for system to check
@@ -161,16 +166,30 @@ for ii = 1:size(DV1,1)
         tburn2 = DT2(ii,jj); %pull single tburn2 for system to check
         R2sys = R2(ii);      %pull single R2 for system to check (should this be ii or jj?)
         SuccessList = CheckSystem(orbitname,PosNum,DV1sys,DV2sys,tburn1,tburn2,R2sys,p1,p2,flyby_velocity_p,maindata); %produce list of successful ISOs
-        %[a] = results(success,R2,m_break); ???
         PercentCoverage_sys = MixOrbitPositions(SuccessList,SuccessList); %check 2 spacecraft in the same orbit
         PercentCoverage(ii,jj) = mean(diag(PercentCoverage_sys)); %assume only evaluating 1 spacecraft (average over whole orbit)
     end
-    fprintf("%.2f%%\n",100 * ii/size(DV1,1)) 
+    fprintf("%.1f%%\n",100 * ii/size(DV1,1)) %note progress
 end
 t_taken = toc;
-fprintf("%.1f s taken, %.2f s/system\n",t_taken,t_taken/(numR2*numMass))
+fprintf("%.1f s taken, %.2f s/system\n",t_taken,t_taken/(numR2*numMass)) %display time taken
 
+%finds indecies of the best percent coverage
+[vals,i1] = max(PercentCoverage);
+[maxval,i2] = max(vals);
+ii = i1(i2);
+jj = i2;
 
-results(PercentCoverage,DV1,DV2,mass_array2,R2,m_break,ii,jj,mass_payload,power_payload,prop_scheme,R1)
+%prelimnary iteration code
+% fprintf("Iteration %i, best coverage: %.2f%%\n",count,maxval)
+% R_max = [R2(max(ii-2,1)),R2(min(ii+2,length(R2)))];
+% m_break = [m_break_array(max(jj-2,1)),m_break_array(min(jj+2,length(m_break_array)))];
+% improvement = abs(maxval_prev-maxval)/maxval;
+% maxval_prev = maxval;
+% count = count+1;
+%pause
+%end
+%%
+results(PercentCoverage,DV1,DV2,mass_array2,R2,m_break_array,ii,jj,mass_payload,power_payload,prop_scheme,R1)
 
 
