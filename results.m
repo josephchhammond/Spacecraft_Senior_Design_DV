@@ -30,7 +30,7 @@ m4 = mass_array3(1);
 
 disp(' ');
 disp('ISO COVERAGE:');
-fprintf( 'Payload mass: %f percent\n', PercentCoverage(ii,jj));
+fprintf( '%f percent\n', PercentCoverage(ii,jj));
 disp(' ');
 disp('~~~~~');
 
