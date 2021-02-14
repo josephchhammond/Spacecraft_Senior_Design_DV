@@ -36,10 +36,10 @@ disp('~~~~~');
 
 disp(' ');
 disp('Propulsive Capabilities:');
-fprintf('Earth Hyberbolic Excess: %.2f m/s\n', preposition_DV1);
-fprintf('Preposition DV: %.2f m/s\n', preposition_DV2);
-fprintf('Departure DV: %.2f m/s\n', dv1);
-fprintf('Arrival DV: %.2f m/s\n', dv2);
+fprintf('Launch Vehicle DV: %.2f m/s\n', preposition_DV1);
+fprintf('Payload mass: %.2f m/s\n', preposition_DV2);
+fprintf('Payload mass: %.2f m/s\n',dv1);
+fprintf('Payload mass: %.2f m/s\n', mass_array1(1));
 disp(' ');
 disp('~~~~~');
 

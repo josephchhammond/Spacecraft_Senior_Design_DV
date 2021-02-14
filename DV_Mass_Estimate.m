@@ -40,8 +40,8 @@ R4D = [0, 3.63, 312, 0]; % 1 R4D system
 prop_scheme = [R4D;XR100_2;R4D];
 
 %size of simulation
-numR2 = 7;
-numMass = 7;
+numR2 = 4;
+numMass = 4;
 
 % Neglect for now:
 % percentages = [DVsuccess, margin, time] ---FIX
@@ -185,6 +185,7 @@ fprintf("%.1f s taken, %.2f s/system\n",t_taken,t_taken/(numR2*numMass)) %displa
 %pause
 %end
 %%
-results(PercentCoverage,DV1,DV2,mass_array2,R2,m_break_array,mass_payload,power_payload,prop_scheme,R1)
+
+results(PercentCoverage,preposition_DV1,preposition_DV2,DV1,DV2,mass_array2,R2,m_break_array,mass_payload,power_payload,prop_scheme,R1)
 
 
