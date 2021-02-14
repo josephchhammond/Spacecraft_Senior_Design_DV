@@ -29,9 +29,9 @@ power_area1 = power_area2;
 
 
 disp(' ');
-disp('ISO COVERAGE:');
-fprintf( '%.2f percent\n', PercentCoverage(ii,jj));
-disp(' ');
+disp('Optimal Solution:');
+fprintf( 'ISO Coverage: %.2f percent\n', PercentCoverage(ii,jj));
+fprintf( 'Maximum Intercept Range: %.2f AU\n', R2_ii);
 disp('~~~~~');
 
 disp(' ');
@@ -40,7 +40,6 @@ fprintf('Earth Hyberbolic Excess: %.2f m/s\n', preposition_DV1);
 fprintf('Preposition DV: %.2f m/s\n', preposition_DV2);
 fprintf('Departure DV: %.2f m/s\n', dv1);
 fprintf('Arrival DV: %.2f m/s\n', dv2);
-disp(' ');
 disp('~~~~~');
 
 
