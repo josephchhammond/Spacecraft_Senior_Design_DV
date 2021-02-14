@@ -72,7 +72,6 @@ for ii = 1:numR2
         
         % Create system and develop performance outputs  
         [~,~, dv2,dt2] = prop_sizing2(m4, m3, payload_SP_area, R2_temp, prop_scheme(3,:));
-%         [~,~, dv1,dt1] = prop_sizing2(m3, m2, EP_SP_area, R1, prop_scheme(2,:));
         [~,~, dv1,dt1] = prop_sizing2(m3, m2, payload_SP_area, R1, prop_scheme(2,:));
         
         %Check for any unrealistic answers (negative or imaginary)

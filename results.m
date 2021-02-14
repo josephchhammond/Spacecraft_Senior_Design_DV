@@ -16,7 +16,6 @@ dv2 = DV2(ii,jj);
 
 
 m3 = mass_array1(1);
-power_area1 = 0;
 
 [~,power_mass4,power_area4] = panel_power(R2_ii, [], power_payload); 
 
@@ -26,11 +25,12 @@ m2 = mass_array2(1);
 [mass_array3,power_area3,~] = prop_sizing1(m2, power_area4, R2_ii, dv2, prop_scheme(3,:));
 m4 = mass_array3(1);
 
+power_area1 = power_area2;
 
 
 disp(' ');
 disp('ISO COVERAGE:');
-fprintf( '%f percent\n', PercentCoverage(ii,jj));
+fprintf( '%.2f percent\n', PercentCoverage(ii,jj));
 disp(' ');
 disp('~~~~~');
 
@@ -38,46 +38,46 @@ disp('~~~~~');
 disp(' ');
 disp('Stage 1 - Preposition');
 disp(' ');
-fprintf('Payload mass: %f kg\n', mass_array1(1));
-fprintf('Propellant mass: %f kg\n', mass_array1(2));
-fprintf('Propellant structure mass: %f kg\n', mass_array1(3));
-fprintf('Power mass: %f kg\n', mass_array1(4));
-fprintf('Dry mass: %f kg\n', mass_array1(5));
-fprintf('Total stage mass: %f kg\n', mass_array1(6));
-fprintf('Total solar array area required: %f m2\n', power_area1);
+fprintf('Payload mass: %.2f kg\n', mass_array1(1));
+fprintf('Propellant mass: %.2f kg\n', mass_array1(2));
+fprintf('Propellant structure mass: %.2f kg\n', mass_array1(3));
+fprintf('Power mass: %.2f kg\n', mass_array1(4));
+fprintf('Dry mass: %.2f kg\n', mass_array1(5));
+fprintf('Total stage mass: %.2f kg\n', mass_array1(6));
+fprintf('Total solar array area required: %.2f m2\n', power_area1);
 disp('~~~~~');
 
 disp(' ');
 disp('Stage 2 - Departure');
 disp(' ');
-fprintf('Payload mass: %f kg\n', mass_array2(1));
-fprintf('Propellant mass: %f kg\n', mass_array2(2));
-fprintf('Propellant structure mass: %f kg\n', mass_array2(3));
-fprintf('Power mass: %f kg\n', mass_array2(4));
-fprintf('Dry mass: %f kg\n', mass_array2(5));
-fprintf('Total stage mass: %f kg\n', mass_array2(6));
-fprintf('Total solar array area required: %f m2\n', power_area2);
+fprintf('Payload mass: %.2f kg\n', mass_array2(1));
+fprintf('Propellant mass: %.2f kg\n', mass_array2(2));
+fprintf('Propellant structure mass: %.2f kg\n', mass_array2(3));
+fprintf('Power mass: %.2f kg\n', mass_array2(4));
+fprintf('Dry mass: %.2f kg\n', mass_array2(5));
+fprintf('Total stage mass: %.2f kg\n', mass_array2(6));
+fprintf('Total solar array area required: %.2f m2\n', power_area2);
 disp('~~~~~');
 
 disp(' ');
 disp('Stage 3 - Arrival');
 disp(' ');
-fprintf('Payload mass: %f kg\n', mass_array3(1));
-fprintf('Propellant mass: %f kg\n', mass_array3(2));
-fprintf('Propellant structure mass: %f kg\n', mass_array3(3));
-fprintf('Power mass: %f kg\n', mass_array3(4));
-fprintf('Dry mass: %f kg\n', mass_array3(5));
-fprintf('Total stage mass: %f kg\n', mass_array3(6));
-fprintf('Total solar array area required: %f m2\n', power_area3);
+fprintf('Payload mass: %.2f kg\n', mass_array3(1));
+fprintf('Propellant mass: %.2f kg\n', mass_array3(2));
+fprintf('Propellant structure mass: %.2f kg\n', mass_array3(3));
+fprintf('Power mass: %.2f kg\n', mass_array3(4));
+fprintf('Dry mass: %.2f kg\n', mass_array3(5));
+fprintf('Total stage mass: %.2f kg\n', mass_array3(6));
+fprintf('Total solar array area required: %.2f m2\n', power_area3);
 disp('~~~~~');
 
 disp(' ');
 disp('Payload');
 disp(' ');
-fprintf('Payload mass: %f kg\n', mass_payload);
-fprintf('Power mass: %f kg\n', power_mass4);
-fprintf('Total stage mass: %f kg\n', m4);
-fprintf('Total solar array area required: %f m2\n', power_area4);
+fprintf('Payload mass: %.2f kg\n', mass_payload);
+fprintf('Power mass: %.2f kg\n', power_mass4);
+fprintf('Total stage mass: %.2f kg\n', m4);
+fprintf('Total solar array area required: %.2f m2\n', power_area4);
 disp('~~~~~');
 
 
