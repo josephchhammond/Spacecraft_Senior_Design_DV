@@ -185,6 +185,6 @@ fprintf("%.1f s taken, %.2f s/system\n",t_taken,t_taken/(numR2*numMass)) %displa
 %pause
 %end
 %%
-results(PercentCoverage,DV1,DV2,mass_array2,R2,m_break_array,mass_payload,power_payload,prop_scheme,R1)
+results(PercentCoverage,DV1,DV2,mass_array2,R2,m_break_array,ii,jj,mass_payload,power_payload,prop_scheme,R1)
 
 

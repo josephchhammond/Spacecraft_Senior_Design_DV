@@ -1,8 +1,13 @@
-function results(PercentCoverage,DV1,DV2,mass_array1,R2,m_break,ii,jj,mass_payload, power_payload, prop_scheme, R1)
+function results(PercentCoverage,DV1,DV2,mass_array1,R2,m_break,mass_payload, power_payload, prop_scheme, R1)
 
 
 
 
+%finds indecies of the best percent coverage
+[vals,i1] = max(PercentCoverage);
+[maxval,i2] = max(vals);
+ii = i1(i2);
+jj = i2;
 
 % Find index ii and jj of best system
 R2_ii = R2(ii);
