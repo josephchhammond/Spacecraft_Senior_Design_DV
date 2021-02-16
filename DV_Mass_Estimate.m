@@ -13,7 +13,7 @@ clc
 close all
 
 %input orbit data, include numbers and rendevous location for non-instantanous factor
-orbitname = 'Orb_1.0x1.15AU_Complete';
+orbitname = 'Orb_1.0x1.15AU_10AULim';
 orbit = [1,1.35]; %AU
 preposition_DV1 = 3000; %m/s   ---> launch vehicle
 preposition_DV2 = 300; %m/s   ---> burn 1
