@@ -19,10 +19,10 @@ preposition_DV1 = 3000; %m/s   ---> launch vehicle
 preposition_DV2 = 300; %m/s   ---> burn 1
 
 mass_payload = 600; %kg
-flyby_velocity_p = [0,0,10]; % [a,b,c] where flyby velocity (km/s) = a^2x + bx + c where x is heliocentric range in 1/AU
+flyby_velocity_p = [0,0,10]; % [a,b,c] where flyby velocity (km/s) = a^2x + bx + c where x is reciprocal of heliocentric range in 1/AU
 power_payload = 500; %W
-R_max = [3, 8]; %Range of heliocentric rendevous design pts, AU
-m_break = [.05,.7]; %Range of mass breakdown (propmass of departure stage/propmass of arrival and departure stages)
+R_max = [3, 11]; %Range of heliocentric rendevous design pts, AU
+m_break = [.04,.6]; %Range of mass breakdown (propmass of departure stage/propmass of arrival and departure stages)
 
 % prop = [thrust/type, drymass, ISP, power];
 % thrust/type: = 0 if chemical/instantaneous thrust, else thrust in N
@@ -36,12 +36,12 @@ XR100_2 = [10, 500, 5000, 200000]; %2 XR-100 systems
 R4D = [0, 3.63, 312, 0]; % 1 R4D system
 
 
-% prop_scheme = [preposition_DV2, departure_DV, arrival_DV]
+% prop_scheme = [preposition_DV2, departure_DV, arrival_DV] ?Can we remove?
 prop_scheme = [R4D;XR100_2;R4D];
 
 % Size of simulation
-numR2 = 6;
-numMass = 6;
+numR2 = 9;
+numMass = 9;
 
 %% Current Assumptions (function assumptions not included)
 
@@ -74,7 +74,7 @@ numMass = 6;
 % maxval_prev = 0;
 % TOL = 1e-2;
 % count = 1;
-% maindata = LoadWholeOrbit(orbitname,12); %load in data to matlb once
+% maindata = LoadWholeOrbit(orbitname,12); %load in data to matlab once
 %while improvement>TOL && count<10
 
 % Find mass in launch vehicle
@@ -108,10 +108,10 @@ m2 = mass_array2(1);
 
 %% Evaluate Prop System Success Rate
 % Determine success rate of each proposed system
-maindata = LoadWholeOrbit(orbitname,12); %load in data to matlb once
+maindata = LoadWholeOrbit(orbitname,12); %load in data to matlab once **If iteration used, comment this line, make sure data loaded before while loop**
 PosNum = 0; %set to zero means check every orbit position
-tic 
 PercentCoverage = zeros(numR2,numMass); %preallocate coverage matrix
+tic 
 
 fprintf("0%%\n") %indicate loop start
 for ii = 1:size(DV1,1)
