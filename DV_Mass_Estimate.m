@@ -124,8 +124,9 @@ for ii = 1:size(DV1,1)
         SuccessList = CheckSystem(orbitname,PosNum,DV1sys,DV2sys,tburn1,tburn2,R2sys,p1,p2,flyby_velocity_p,maindata); %produce list of successful ISOs
         PercentCoverage_sys = MixOrbitPositions(SuccessList,SuccessList); %check 2 spacecraft in the same orbit
 %         PercentCoverage(ii,jj) = mean(diag(PercentCoverage_sys)); %assume only evaluating 1 spacecraft (average over whole orbit)
-        PercentCoverage_sys = [PercentCoverage_sys(:,7:12),PercentCoverage_sys(:,1:6)];
-        PercentCoverage(ii,jj) = mean(diag(PercentCoverage_sys)); %assume evaluating 2 spacecraft in 180deg displacement(average over whole orbit)
+        %PercentCoverage_sys = [PercentCoverage_sys(:,7:12),PercentCoverage_sys(:,1:6)];
+        %PercentCoverage(ii,jj) = mean(diag(PercentCoverage_sys)); %assume evaluating 2 spacecraft in 180deg displacement(average over whole orbit)
+        [PercentCoverage(ii,jj),~] = BestCombo(PercentCoverage_sys); %checks each spacing for best average coverage, not currently saving spacing value.
     end
     fprintf("%.1f%%\n",100 * ii/size(DV1,1)) %note progress
 end
