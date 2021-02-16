@@ -40,8 +40,8 @@ R4D = [0, 3.63, 312, 0]; % 1 R4D system
 prop_scheme = [R4D;XR100_2;R4D];
 
 % Size of simulation
-numR2 = 4;
-numMass = 4;
+numR2 = 6;
+numMass = 6;
 
 %% Current Assumptions (function assumptions not included)
 
@@ -123,7 +123,9 @@ for ii = 1:size(DV1,1)
         R2sys = R2(ii);      %pull single R2 for system to check (should this be ii or jj?)
         SuccessList = CheckSystem(orbitname,PosNum,DV1sys,DV2sys,tburn1,tburn2,R2sys,p1,p2,flyby_velocity_p,maindata); %produce list of successful ISOs
         PercentCoverage_sys = MixOrbitPositions(SuccessList,SuccessList); %check 2 spacecraft in the same orbit
-        PercentCoverage(ii,jj) = mean(diag(PercentCoverage_sys)); %assume only evaluating 1 spacecraft (average over whole orbit)
+%         PercentCoverage(ii,jj) = mean(diag(PercentCoverage_sys)); %assume only evaluating 1 spacecraft (average over whole orbit)
+        PercentCoverage_sys = [PercentCoverage_sys(:,7:12),PercentCoverage_sys(:,1:6)];
+        PercentCoverage(ii,jj) = mean(diag(PercentCoverage_sys)); %assume evaluating 2 spacecraft in 180deg displacement(average over whole orbit)
     end
     fprintf("%.1f%%\n",100 * ii/size(DV1,1)) %note progress
 end

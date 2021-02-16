@@ -23,7 +23,7 @@ function [Success] = CheckSystem(OrbitName,PosNum,DV1sys,DV2sys,tburn1,tburn2,R2
 
 
     %unit adjustments
-    AU = 1.496e8;
+    AU = 1.496e8; %AU to km
     R2sys = R2sys*AU; % adjust to AU
     DV1sys = DV1sys/1000; %convert to km/s
     DV2sys = DV2sys/1000; %convert to km/s
@@ -40,13 +40,13 @@ function [Success] = CheckSystem(OrbitName,PosNum,DV1sys,DV2sys,tburn1,tburn2,R2
         b = PosNum;
     end
     
-for jj = a:b
+for jj = a:b %for each orbit position
     PosNum = jj; %reusing this variable
 %check a specific position for all ISOs add it to the output list
     OrbitData = MainData{1,PosNum}; %load in the data for the orbit and the position
     n = length(OrbitData.dv1); %how many ISOs are in this data set?
     ISOsuccess = zeros(n,1); %initalize the ISOsuccess vector as all zeros
-    for ii = 1:n
+    for ii = 1:n %for each ISO
         [DV1data,DV2data,dtdata,R2data] = readISOdata(OrbitData,ii); %pulls the data for the ii ISO
         [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,DV1sys,DV2sys,tburn1,tburn2,R2sys,p1_adjust,p2_adjust,p_flyby); %checks the ISO data agianst system data
         num_good_transfers = sum(pass_fail,'all');
