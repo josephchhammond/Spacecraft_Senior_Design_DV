@@ -39,19 +39,10 @@ R4D = [0, 3.63, 312, 0]; % 1 R4D system
 % prop_scheme = [preposition_DV2, departure_DV, arrival_DV]
 prop_scheme = [R4D;XR100_2;R4D];
 
-%size of simulation
+% Size of simulation
 numR2 = 4;
 numMass = 4;
 
-% Neglect for now:
-% percentages = [DVsuccess, margin, time] ---FIX
-% DVsuccess: % total probability of success of DV system, from external failures
-% margin: % margin on DV of each burn
-% time: % mission ready time, yrs
-% Expand to include other things like non-instantaneous model and gravity assist???
-
-% Combined to determine percentile of orbits to design to!
-% percentages = [96, 5, 20];
 %% Current Assumptions (function assumptions not included)
 
 % ----- Preposition -----
@@ -59,6 +50,7 @@ numMass = 4;
 % Flight vehicle uses preposition_DV1
 % Mission only viable at end of preposition process
 % Max out launch vehicle mass
+% No power draw
 
 % -----  Departure  -----
 % Solar panel at BOL throughout analysis
@@ -68,59 +60,21 @@ numMass = 4;
 
 % -----   Arrival   -----
 % 1 burn
+% No power draw
 
 % -----    Misc     -----
 % Standard units: km, yr
 % No trajectory adjustment or orbital maintanence burns
 % No gravity assists
 % Non-instantaneous burns modeled as instantaneous calculated under a safety factor
-
-%% Function list
-
-% Non-instantanous adjusment
-% [p1,p2] = NonInstantaneousLambert(Orbit); TEMPORARY
-% [DV_adj] = DV_adjustment(DV,p,dtburn_dt); DONE
-
-% [v] = flybyvelocity(R,p); DONE
-
-% Power
-% [power, mass, area_out] = panel_power(R,area,power); DONE
-%       use panel_power(R, area) or use panel(R, [], power)
-
-% Prop sizing
-% [mass_array,power_area, dt] = prop_sizing1(total_mass, power_area, R, dv,prop_system); DONE
-% [mass_array,power_area, dv, dt] = prop_sizing2(payload_mass, m0,power_area, R, prop_system)% m_payload = mass_array(1); DONE
-
-
-% Launch Vehicle
-% [max_m] = launchvehicle(DV); % Max
-
-% Iteration Functions:
-% [DV1, DV2, DT1, DT2, R2] = propsystemsim(m_total,mass_payload, power_payload, prop_scheme, R1, R_max); %DONE
-% [success] = orbits(DV1, DV2, DT1, DT2, R2; %Colton
-
-%% Future Work
-% Change so no power draw on prepositioning function
-% Add in orbits data processing
-% Add post processing plots and readout
-% Check: Is .05 struct good for eprop?
-% Get good numbers on preposition costs!!!
-
-
-% Far future work:
-
-% Further noninstantaneous lambert study and funciton
-% Refine points in analysis that assume eprop on 1st burn and chem prop on
-        % 2nd burn
-% Refine so burn time is adjustable and we can fuel dump stages
-%% Calculations
+%% Create Propulsion Systems
 
 %preliminary code for itteration
 % improvement = 1;
 % maxval_prev = 0;
 % TOL = 1e-2;
 % count = 1;
-maindata = LoadWholeOrbit(orbitname,12); %load in data to matlb once
+% maindata = LoadWholeOrbit(orbitname,12); %load in data to matlb once
 %while improvement>TOL && count<10
 
 % Find mass in launch vehicle
@@ -138,21 +92,23 @@ m2 = mass_array2(1);
 % Simulate a variety of proposed systems
 [DV1, DV2, DT1, DT2, R2,m_break_array] = propsystemsim(m2, mass_payload, power_payload, prop_scheme, R1, R_max,m_break,numR2,numMass);
 
-n = 1;
-for ii = 1:size(DV1,1)
-    for jj = 1:size(DV1,2)
-        DV1_plot(n) = DV1(ii,jj)/1000;
-        DV2_plot(n) = DV2(ii,jj)/1000;
-        n = n+1;
-    end
-end
-plot(DV1_plot,DV2_plot,'x')
-xlabel('Burn 1 (km/s)')
-ylabel('Burn 2 (km/s)')
-title('Preprocessed DV Capabilities (Blind to dt)')
+% n = 1;
+% for ii = 1:size(DV1,1)
+%     for jj = 1:size(DV1,2)
+%         DV1_plot(n) = DV1(ii,jj)/1000;
+%         DV2_plot(n) = DV2(ii,jj)/1000;
+%         n = n+1;
+%     end
+% end
+% plot(DV1_plot,DV2_plot,'x')
+% xlabel('Burn 1 (km/s)')
+% ylabel('Burn 2 (km/s)')
+% title('Preprocessed DV Capabilities (Blind to dt)')
 
 
+%% Evaluate Prop System Success Rate
 % Determine success rate of each proposed system
+maindata = LoadWholeOrbit(orbitname,12); %load in data to matlb once
 PosNum = 0; %set to zero means check every orbit position
 tic 
 PercentCoverage = zeros(numR2,numMass); %preallocate coverage matrix
