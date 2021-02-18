@@ -136,4 +136,5 @@ V = V_panels + V_prop + V_sys;
 if ~isreal(V) || isnan(V) || V~=norm(V)
     error('Unreal volume of stage')
 end
+
 end

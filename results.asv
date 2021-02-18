@@ -1,4 +1,4 @@
-function results(PercentCoverage,preposition_DV1,preposition_DV2,V_total,DV1,DV2,mass_array1,R2,m_break,mass_payload, power_payload, prop_scheme, R1,V_max,V1,V_Payload)
+function results(PercentCoverage,preposition_DV1,preposition_DV2,V_total,DV1,DV2,mass_array1,R2,m_break,mass_payload, power_payload, prop_scheme, R1,V1,V_Payload)
 
 
 
@@ -13,7 +13,7 @@ jj = i2;
 R2_ii = R2(ii);
 dv1 = DV1(ii,jj);
 dv2 = DV2(ii,jj);
-v_total = V_total(ii,jj)*V_max;
+
 
 m3 = mass_array1(1);
 
@@ -29,7 +29,6 @@ m4 = mass_array3(1);
 
 power_area1 = power_area2;
 
-v_total_test =  V1 + V2 +V3 + V_Payload +V_payload_SP;
 
 disp(' ');
 disp('Optimal Solution:');
@@ -43,8 +42,7 @@ fprintf('Earth Hyberbolic Excess: %.2f m/s\n', preposition_DV1);
 fprintf('Preposition DV: %.2f m/s\n', preposition_DV2);
 fprintf('Departure DV: %.2f m/s\n', dv1);
 fprintf('Arrival DV: %.2f m/s\n', dv2);
-fprintf('Total Volume: %.2f m^3\n', v_total);
-fprintf('Total Volume: %.2f m^3\n', v_total_test);
+fprintf('Arrival DV: %.2f m/s\n', dv2);
 disp('~~~~~');
 
 

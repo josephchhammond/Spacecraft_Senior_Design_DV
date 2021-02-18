@@ -61,10 +61,8 @@ for ii = 1:numR2
     %Determine variable mass in system
     if payload_SP_mass > EP_SP_mass
         m_available = m2 - m4;
-        V_panels = V_payload_panels;
     else
         m_available = m2 - mass_payload - EP_SP_mass;
-        V_panels = V_EP_panels;
     end
     
     
@@ -77,11 +75,11 @@ for ii = 1:numR2
             error('Mass breakdown error')
         end
         % Create system and develop performance outputs  
-        [~,~, dv2,dt2,V2] = prop_sizing2(m4, m3, payload_SP_area, R2_temp, prop_scheme(3,:));
-        [~,~, dv1,dt1,V1] = prop_sizing2(m3, m2, payload_SP_area, R1, prop_scheme(2,:));
+        [~,~, dv2,dt2,V2] = prop_sizing2(m4, m3, 0, R2_temp, prop_scheme(3,:));
+        [~,~, dv1,dt1,V1] = prop_sizing2(m3, m2, 0, R1, prop_scheme(2,:));
         
         
-        v_total = V1 + V2 + V_panels;
+        v_total = V1 + V2;
         %Check for any unrealistic answers (negative or imaginary)
         if dv2 ~= norm(dv2) || dv1 ~= norm(dv1) || v_total~= norm(v_total)
             dv2 = 0;

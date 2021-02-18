@@ -6,23 +6,19 @@
 % maximize mission success. Success percentile and mass breakdown of
 % optimal system is returned
 %% Inputs
-%Changes needed before transition
-
-
-% Finish adding volumetric parameters
-    
-% Add Margins
-% Add BOL and aged solar panels for analysis
+% Changes needed before transition
+    % Finish adding volumetric parameters and 
+    % Add Margins
+    % Add BOL and aged solar panels for analysis
 
 
 
-%Changes to delay
-
-% Run sim with 2 SC vs 3 SC
-% 2 orbits that are different
-% Fully funcitoning lambert factor
-% Eprop volume definition
-% Fuel dumping funcitonality
+% Changes to delay
+    % Run sim with 2 SC vs 3 SC
+    % 2 orbits that are different
+    % Fully funcitoning lambert factor
+    % Eprop volume definition
+    % Fuel dumping funcitonality
 
 
 clear
@@ -53,12 +49,10 @@ m_break = [.5,.75]; %Range of mass breakdown (propmass of departure stage/propma
 %                   7 - Oxidizer Density (kg/m^3)
 %                   8 - Fuel Density (kg/m^3)
 
-XR100 =   [5,  250, 5000, 100000,0,inf,1500,0]; % XR-100 systems (GUESS IS 1500kg/m^3!!)
-XR100_2 = [10, 500, 5000, 200000,0,inf,1500,inf]; %2 XR-100 systems (GUESS IS 1500kg/m^3!!)
+XR100 =   [5,  250, 5000, 100000,0,inf,1000,0]; % XR-100 systems (GUESS IS 1000kg/m^3!!)
+XR100_2 = [10, 500, 5000, 200000,0,inf,1000,inf]; %2 XR-100 systems (GUESS IS 1000kg/m^3!!)
 % R4D = [0, 3.63, 312, 46]; % 1 R4D system
 R4D = [0, 3.63, 312, 0, 0, 1.65, 1440, 880]; % 1 R4D system
-
-R4D = [0, 3.63, 312, 0, 0, inf, 1440, 880]; % 1 R4D system
 
 
 % prop_scheme = [preposition_DV2, departure_DV, arrival_DV] ?Can we remove?
@@ -117,12 +111,16 @@ V_total = (V + V2 + volume_payload)/V_max;
 maindata = LoadWholeOrbit(orbitname,12); %load in data to matlab once **If iteration used, comment this line, make sure data loaded before while loop**
 PosNum = 0; %set to zero means check every orbit position
 PercentCoverage = zeros(numR2,numMass); %preallocate coverage matrix
+
+results(PercentCoverage,preposition_DV1,preposition_DV2,V_total,DV1,DV2,mass_array2,R2,m_break_array,mass_payload,power_payload,prop_scheme,R1,V_max,V2,volume_payload)
+
+
 tic 
 
 fprintf("0%%\n") %indicate loop start
 for ii = 1:size(DV1,1)
     for jj = 1:size(DV1,2)
-        Vsys = V_total(ii,jj)
+        Vsys = V_total(ii,jj);
         DV1sys = DV1(ii,jj); %pull single DV1 for system to check
         DV2sys = DV2(ii,jj); %pull single DV2 for system to check
         tburn1 = DT1(ii,jj); %pull single tburn1 for system to check
@@ -138,6 +136,6 @@ t_taken = toc;
 fprintf("%.1f s taken, %.2f s/system\n",t_taken,t_taken/(numR2*numMass)) %display time taken
 
 %% Display Results
-results(PercentCoverage,preposition_DV1,preposition_DV2,DV1,DV2,mass_array2,R2,m_break_array,mass_payload,power_payload,prop_scheme,R1)
+results(PercentCoverage,preposition_DV1,preposition_DV2,V_total,DV1,DV2,mass_array2,R2,m_break_array,mass_payload,power_payload,prop_scheme,R1,V_max,V2,volume_payload)
 
 
