@@ -1,4 +1,4 @@
-function [m_launch] = launchvehicle(v_inf)
+function [m_launch,V_max] = launchvehicle(v_inf)
 % Given a v_inf, calculate the Launch Mass for the Falcon Heavy Expendable
 % 
 % Inputs: 
@@ -6,6 +6,7 @@ function [m_launch] = launchvehicle(v_inf)
 % 
 % Outputs:
 %   m_launch: Maximum Launch Mass, kg
+%   V_max: Fairing Capacity, m^3
 % 
 % Written by Max McDermott for AERO 448 Senior Design 
 
@@ -31,5 +32,6 @@ C3_vec = [0,5,10,15,20,25,30,35,40,45,60,80,100];
 p = polyfit(C3_vec,m_vec,2); 
 m_launch = polyval(p,C3);
 
+V_max = 145; %m^3
 end
 
