@@ -29,7 +29,6 @@ m4 = mass_array3(1);
 
 power_area1 = power_area2;
 
-v_total_test =  V1 + V2 +V3 + V_Payload +V_payload_SP;
 
 disp(' ');
 disp('Optimal Solution:');
@@ -44,7 +43,6 @@ fprintf('Preposition DV: %.2f m/s\n', preposition_DV2);
 fprintf('Departure DV: %.2f m/s\n', dv1);
 fprintf('Arrival DV: %.2f m/s\n', dv2);
 fprintf('Total Volume: %.2f m^3\n', v_total);
-fprintf('Total Volume: %.2f m^3\n', v_total_test);
 disp('~~~~~');
 
 
@@ -58,7 +56,7 @@ fprintf('Power mass: %.2f kg\n', mass_array1(4));
 fprintf('Dry mass: %.2f kg\n', mass_array1(5));
 fprintf('Total stage mass: %.2f kg\n', mass_array1(6));
 fprintf('Stage prop volume: %.2f m^3\n', V1);
-fprintf('Total solar array area required: %.2f m2\n', power_area1);
+% fprintf('Total solar array area required: %.2f m2\n', power_area1);
 fprintf('Stage solar array volume: %.2f m^3\n', 0);
 disp('~~~~~');
 
@@ -72,7 +70,7 @@ fprintf('Power mass: %.2f kg\n', mass_array2(4));
 fprintf('Dry mass: %.2f kg\n', mass_array2(5));
 fprintf('Total stage mass: %.2f kg\n', mass_array2(6));
 fprintf('Propulsion volume: %.2f m^3\n', (V2-V2_SP));
-fprintf('Total solar array area required: %.2f m2\n', power_area2);
+% fprintf('Total solar array area required: %.2f m2\n', power_area2);
 fprintf('Solar array volume: %.2f m^3\n', V2_SP);
 
 disp('~~~~~');
@@ -87,7 +85,7 @@ fprintf('Power mass: %.2f kg\n', mass_array3(4));
 fprintf('Dry mass: %.2f kg\n', mass_array3(5));
 fprintf('Total stage mass: %.2f kg\n', mass_array3(6));
 fprintf('Stage prop volume: %.2f m^3\n', V3);
-fprintf('Total solar array area required: %.2f m2\n', power_area3);
+% fprintf('Total solar array area required: %.2f m2\n', power_area3);
 fprintf('Stage solar array volume: %.2f m^3\n', 0);
 disp('~~~~~');
 
@@ -98,7 +96,7 @@ fprintf('Payload mass: %.2f kg\n', mass_payload);
 fprintf('Power mass: %.2f kg\n', power_mass4);
 fprintf('Total stage mass: %.2f kg\n', m4);
 fprintf('Payload volume: %.2f m^3\n', V_Payload);
-fprintf('Total solar array area required: %.2f m2\n', power_area4);
+% fprintf('Total solar array area required: %.2f m2\n', power_area4);
 fprintf('Stage solar array volume: %.2f m^3\n', V_payload_SP);
 disp('~~~~~');
 

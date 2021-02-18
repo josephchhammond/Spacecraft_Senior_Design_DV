@@ -5,20 +5,21 @@
 % the optimal mass breakdown and maximum payload operational radius to
 % maximize mission success. Success percentile and mass breakdown of
 % optimal system is returned
-%% Inputs
-% Changes needed before transition
-    % Finish adding volumetric parameters and 
-    % Add Margins
-    % Add BOL and aged solar panels for analysis
 
+%% Future work
+    % Clean up documentation and annotation
 
-
-% Changes to delay
     % Run sim with 2 SC vs 3 SC
     % 2 orbits that are different
     % Fully funcitoning lambert factor
     % Eprop volume definition
     % Fuel dumping funcitonality
+    % Catalog all potential propulsion
+    % Add margins on values
+    % Get better PP costs
+    % Add in other power draws, masses, and volumes?
+%% Inputs
+
 
 
 clear
@@ -37,7 +38,7 @@ flyby_velocity_p = [0,0,10]; % [a,b,c] where flyby velocity (km/s) = a^2x + bx +
 power_payload = 500; %W
 volume_payload = 10; %m^3
 R_max = [3, 11]; %Range of heliocentric rendevous design pts, AU
-m_break = [.5,.75]; %Range of mass breakdown (propmass of departure stage/propmass of arrival and departure stages)
+m_break = [.05,.4]; %Range of mass breakdown (propmass of departure stage/propmass of arrival and departure stages)
 
 % prop = [8];
 %                   1 - 0 for non-impulsive, []|| Thrust for impulsive, [N]
@@ -59,8 +60,8 @@ R4D = [0, 3.63, 312, 0, 0, 1.65, 1440, 880]; % 1 R4D system
 prop_scheme = [R4D;XR100_2;R4D];
 
 % Size of simulation
-numR2 = 4;
-numMass = 4;
+numR2 = 6;
+numMass = 6;
 
 %% Current Assumptions (function assumptions not included)
 
@@ -86,6 +87,10 @@ numMass = 4;
 % No trajectory adjustment or orbital maintanence burns
 % No gravity assists
 % Non-instantaneous burns modeled as instantaneous calculated under a safety factor
+% Electrical system loss of .775
+% Solar panels specific power at 1AU is 120 W/kg
+
+
 %% Create Propulsion Systems
 
 % Find mass in launch vehicle
@@ -112,12 +117,10 @@ maindata = LoadWholeOrbit(orbitname,12); %load in data to matlab once **If itera
 PosNum = 0; %set to zero means check every orbit position
 PercentCoverage = zeros(numR2,numMass); %preallocate coverage matrix
 
-results(PercentCoverage,preposition_DV1,preposition_DV2,V_total,DV1,DV2,mass_array2,R2,m_break_array,mass_payload,power_payload,prop_scheme,R1,V_max,V2,volume_payload)
 
 
 tic 
 
-fprintf("0%%\n") %indicate loop start
 for ii = 1:size(DV1,1)
     for jj = 1:size(DV1,2)
         Vsys = V_total(ii,jj);
@@ -129,11 +132,20 @@ for ii = 1:size(DV1,1)
         SuccessList = CheckSystem(orbitname,PosNum,Vsys,DV1sys,DV2sys,tburn1,tburn2,R2sys,p1,p2,flyby_velocity_p,maindata); %produce list of successful ISOs
         PercentCoverage_sys = MixOrbitPositions(SuccessList,SuccessList); %check 2 spacecraft in the same orbit
         [PercentCoverage(ii,jj),~] = BestCombo(PercentCoverage_sys); %checks each spacing for best average coverage, not currently saving spacing value.
+        
+        if ii == 1 && jj == 1
+%             fprintf("0%%\n") %indicate loop start
+            t_est = toc;
+            fprintf("%.1f s Estimated Runtime, %.2f s/system\n",t_est*(numR2*numMass),t_est) %display time taken
+            tic
+        end
     end
     fprintf("%.1f%%\n",100 * ii/size(DV1,1)) %note progress
 end
-t_taken = toc;
-fprintf("%.1f s taken, %.2f s/system\n",t_taken,t_taken/(numR2*numMass)) %display time taken
+
+ t_taken = toc;
+ t_taken = t_taken + t_est;
+ fprintf("%.1f s Total Runtime Runtime, %.2f s/system\n",t_est,t_est/(numR2*numMass)) %display time taken
 
 %% Display Results
 results(PercentCoverage,preposition_DV1,preposition_DV2,V_total,DV1,DV2,mass_array2,R2,m_break_array,mass_payload,power_payload,prop_scheme,R1,V_max,V2,volume_payload)
