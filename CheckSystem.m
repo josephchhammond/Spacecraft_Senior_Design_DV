@@ -1,4 +1,4 @@
-function [Success] = CheckSystem(OrbitName,PosNum,DV1sys,DV2sys,tburn1,tburn2,R2sys,p1_adjust,p2_adjust,p_flyby,MainData)
+function [Success] = CheckSystem(OrbitName,PosNum,Vsys,DV1sys,DV2sys,tburn1,tburn2,R2sys,p1_adjust,p2_adjust,p_flyby,MainData)
 %Takes the info about which orbits data to check along with prop system values and
 %computes a percent success by calling the other functions defined below.
 %
@@ -48,7 +48,7 @@ for jj = a:b %for each orbit position
     ISOsuccess = zeros(n,1); %initalize the ISOsuccess vector as all zeros
     for ii = 1:n %for each ISO
         [DV1data,DV2data,dtdata,R2data] = readISOdata(OrbitData,ii); %pulls the data for the ii ISO
-        [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,DV1sys,DV2sys,tburn1,tburn2,R2sys,p1_adjust,p2_adjust,p_flyby); %checks the ISO data agianst system data
+        [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,DV2sys,tburn1,tburn2,R2sys,p1_adjust,p2_adjust,p_flyby); %checks the ISO data agianst system data
         num_good_transfers = sum(pass_fail,'all');
         if num_good_transfers > 0 %if any transfer to the ISO succeeded, mark that ISO as a success
             ISOsuccess(ii) = 1;
@@ -97,7 +97,7 @@ function [DV1data,DV2data,dtdata,R2data] = readISOdata(OrbitData,ISOnum)
     R2data  = OrbitData.R2{ISOnum,1};
 end
 
-function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,DV1sys,DV2sys,tburn1,tburn2,R2sys,p1_adjust,p2_adjust,p_flyby)
+function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,DV2sys,tburn1,tburn2,R2sys,p1_adjust,p2_adjust,p_flyby)
 % Converts the provided orbits data to a pass fail metric based on the system parameters
 %
 % Inputs:
@@ -142,7 +142,10 @@ function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,DV1sys,DV2sys
     crit4 = DV1adj <= DV1sys; %check that the system has enough DV
     crit5 = DV2adj <= DV2sys;
     
-    pass_fail = crit1 & crit2 & crit3 & crit4 & crit5; %which transfers met all 5 criteria
+%Check Volume
+    crit6 = Vsys <= 1;
+    
+    pass_fail = crit1 & crit2 & crit3 & crit4 & crit5 & crit6; %which transfers met all 5 criteria
 end
 
 %---------------------------Change Log---------------------------

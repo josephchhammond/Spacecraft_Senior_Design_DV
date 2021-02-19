@@ -1,4 +1,4 @@
-function [DV1, DV2, DT1, DT2, R2, m_break] = propsystemsim(m_total,mass_payload, power_payload, prop_scheme, R1, R_max,m_break,numR2,numMass);
+function [DV1, DV2, DT1, DT2, V, R2, m_break] = propsystemsim(m_total,mass_payload, power_payload, prop_scheme, R1, R_max,m_break,numR2,numMass);
 % This function calculates an array of potential propulsion system concepts
 % and returns their associated propulsive behaviors
 %
@@ -46,16 +46,16 @@ DV1 = zeros(numR2,numMass);
 DV2 = zeros(numR2,numMass);
 DT1 = zeros(numR2,numMass);
 DT2 = zeros(numR2,numMass);
-
+V = zeros(numR2,numMass);
 % Determine solar panels required for EP 
 EP_power = prop_scheme(2,4);
-[~, EP_SP_mass, EP_SP_area] = panel_power(R1,[],EP_power);
+[~, EP_SP_mass, EP_SP_area,V_EP_panels] = panel_power(R1,[],EP_power);
 
 
 for ii = 1:numR2
     % Determine mass of solar panels and payload
     R2_temp = R2(ii);
-    [~,payload_SP_mass,payload_SP_area] = panel_power(R2_temp, [], power_payload);
+    [~,payload_SP_mass,payload_SP_area,V_payload_panels] = panel_power(R2_temp, [], power_payload);
     m4 = payload_SP_mass+mass_payload;
     
     %Determine variable mass in system
@@ -65,21 +65,28 @@ for ii = 1:numR2
         m_available = m2 - mass_payload - EP_SP_mass;
     end
     
+    
     for jj = 1:numMass
         % Determine mass breakdown
         m_break_temp = m_break(jj);
         m3 = m4 + m_break_temp*m_available;
         
+        if (m4 > m3) || (m3 > m2)
+            error('Mass breakdown error')
+        end
         % Create system and develop performance outputs  
-        [~,~, dv2,dt2] = prop_sizing2(m4, m3, payload_SP_area, R2_temp, prop_scheme(3,:));
-        [~,~, dv1,dt1] = prop_sizing2(m3, m2, payload_SP_area, R1, prop_scheme(2,:));
+        [~,~, dv2,dt2,V2] = prop_sizing2(m4, m3, 0, R2_temp, prop_scheme(3,:));
+        [~,~, dv1,dt1,V1] = prop_sizing2(m3, m2, 0, R1, prop_scheme(2,:));
         
+        
+        v_total = V1 + V2;
         %Check for any unrealistic answers (negative or imaginary)
-        if dv2 ~= norm(dv2) || dv1 ~= norm(dv1)
+        if dv2 ~= norm(dv2) || dv1 ~= norm(dv1) || v_total~= norm(v_total)
             dv2 = 0;
             dt2 = 0;
             dv1 = 0;
             dt1 = 0;
+            v_total = 0;
         end
             
         
@@ -87,6 +94,8 @@ for ii = 1:numR2
         DV2(ii,jj) = dv2;
         DT1(ii,jj) = dt1;
         DT2(ii,jj) = dt2; 
+        V(ii,jj) = v_total;
+        
     end
 end
 end

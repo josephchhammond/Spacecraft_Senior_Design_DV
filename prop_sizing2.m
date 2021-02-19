@@ -1,4 +1,4 @@
-function [mass_array,power_area, dv,dt] = ...
+function [mass_array,power_area, dv,dt,V] = ...
     prop_sizing2(payload_mass, m0, power_area, R, prop_system)
 % This function takes in properties of the system and returns values for
 % the mass of the propulsion system, as well as the necessary total solar
@@ -21,6 +21,10 @@ function [mass_array,power_area, dv,dt] = ...
 %                   2 - Thruster dry mass, [kg]
 %                   3 - Isp, [s]
 %                   4 - Power required, [W]
+%                   5 - System Volume (m^3)
+%                   6 - Mixing Ratio (O/F)
+%                   7 - Oxidizer Density (kg/m^3)
+%                   8 - Fuel Density (kg/m^3)
 %
 % Outputs:
 % mass_array[1,6]:  Mass of different portions of system [kg]
@@ -32,6 +36,7 @@ function [mass_array,power_area, dv,dt] = ...
 %                   6 - Total stage mass, [kg]                   
 % power_area[1]: Total area of solar array required, [m2]
 % dt[1]: Burn time, [s]
+% V[1]: Volume of system, [m^3]
 %
 % Written by: CLarkin
 
@@ -39,7 +44,7 @@ function [mass_array,power_area, dv,dt] = ...
 g0 = 9.81;      % Gravitational acceleration, [m/s2]
 
 
-% Input validation to confirm instantaneous-compatible prop system
+%% Input validation to confirm instantaneous-compatible prop system
 if prop_system(1) > 0       % E-Prop thruster
     % Input validation for Chemical Isp
     if prop_system(3) > 500 && prop_system(3) <= 5000
@@ -82,18 +87,21 @@ else
 end
 
 
-% Mass assignments
+%% Mass assignments
 mass_array(1) = payload_mass;                           % Payload Mass [kg]
 mass_array(6) = m0;                                     % Initial mass [kg]
     
-[~,power_mass1,~] = panel_power(R, power_area);                         % Power mass on vehicle [kg]
-[~,power_mass2,power_area2] = panel_power(R, [], prop_system(4));        % Power mass required at stage [kg]
+[~,power_mass1,~,V_panels1] = panel_power(R, power_area);                         % Power mass on vehicle [kg]
+[~,power_mass2,power_area2,V_panels2] = panel_power(R, [], prop_system(4));        % Power mass required at stage [kg]
 if power_mass2 >= power_mass1
     mass_array(4) =  power_mass2 - power_mass1;
     power_area = power_area2;
+    V_panels = V_panels2-V_panels1;
 else
     mass_array(4) = 0;
+    V_panels = 0;
 end
+
 
 mass_array(2) = (1-struct) * (m0 - (mass_array(1) + prop_system(2) + mass_array(4))); % Propellant mass [kg]
 mass_array(3) = (struct) * (m0 - (mass_array(1) + prop_system(2) + mass_array(4)));   % Propellant mass [kg]
@@ -108,13 +116,25 @@ else
     dt = 0; %burn time (s)
 end
 
-% disp(' ');
-% fprintf('Payload mass: %f kg\n', mass_array(1));
-% fprintf('Propellant mass: %f kg\n', mass_array(2));
-% fprintf('Propellant structure mass: %f kg\n', mass_array(3));
-% fprintf('Power mass: %f kg\n', mass_array(4));
-% fprintf('Dry mass: %f kg\n', mass_array(5));
-% fprintf('Total stage mass: %f kg\n', mass_array(6));
-% fprintf('Total solar array area required: %f m2\n', power_area);
-% disp('~~~~~');
+%% Volume Assignments
+
+O_F = prop_system(6); % Mixing Ratio (O/F)
+rho_O = prop_system(7); % Oxidizer Density (kg/m^3)
+rho_F = prop_system(8); % Fuel Density (kg/m^3)
+
+m_O = mass_array(2)*(1-1/(O_F+1)); % Oxidizer mass (kg)
+m_F = mass_array(2)/(O_F+1); % Fuel mass (kg)
+
+
+V_O = m_O/rho_O; % Oxidizer volume (m^3)
+V_F = m_F/rho_F; % Fuel volume (m^3)
+V_sys = prop_system(5);
+V_prop = V_O+V_F;
+
+V = V_panels + V_prop + V_sys;
+
+if ~isreal(V) || isnan(V) || V~=norm(V)
+    error('Unreal volume of stage')
+end
+
 end

@@ -1,4 +1,4 @@
-function [power, mass, area_out] = panel_power(R,area,power)
+function [power, mass, area_out, volume] = panel_power(R,area,power)
 % This function takes in the distance from the solar panel to the sun, the
 % area of the solar panel, and its efficiency and returns the power
 % available and mass. Optionally, the power may be passed as the fourth
@@ -26,27 +26,45 @@ function [power, mass, area_out] = panel_power(R,area,power)
 % Edit by Joey -> Took out efficiency from mass calc, specific power should
 % have efficiency in it
 
-R = R * 1.496e11;   % Convert from AU to meters
+
+
 
 % Constants
-P_sun = 3.84e26;    % Total power of sun, [W]
-w_kg = 120;         % Specific power of solar array, [W/kg]
+% AU = 1.496e11;              % Convert from AU to meters
+% P_sun = 3.84e26;            % Total power of sun, [W]
+% Efficiency loss correction (From R.Meisberger)
+eff = .775;                 % Assume 22.5% loss in system
+w_kg_1AU = 120;             % Specific power of solar array at 1AU, [W/kg]
+w_density_1AU = 20000/7;    % [W/m^3] Volume of 1 20kW array is 0.6096x6m cylinder = 7m^2
+w_A_1AU = 20000/(6*13.7);   %[W/m^2]
 
-% Efficiency loss correction (From R.Meisberger)77
-eff = .33 * .775;   % Assume 33% efficiency, 22.5% Loss
+%Add a cutoff for minimum radius, assumption is if we are under 1AU we can
+%protect solar panels by angleing them so incident radiation is that of 1AU
+if R < 1
+    R = 1;
+end
 
+%P_1AU = P_sun / (4*pi*AU^2); % Solar irradiance at 1AU
+w_kg = w_kg_1AU / R^2 * eff;
+w_density = w_density_1AU / R^2 * eff;
+w_A = w_A_1AU / R^2 * eff;
 switch nargin
-    case 2  % User passes area, distance, and efficency to get power out
+    case 2  % User passes area and distance to get power out
 
         % Use inverse-square law to find power at panel
-        power = P_sun * area / (4*pi*R^2) * eff; % Array output power, [W]
-        area_out = area;        
+        area_out = area;
+        power = w_A * area * eff;
+        
+                % power = P_1AU*eff/R^2; % Array output power, [W]
+
     case 3  % User passes area, distance, efficiency, and desired power
             % to get required panel area.
         
         % Required panel area
-        area_out = power * (4*pi*R^2) / P_sun / eff;  % Panel area, [m2]
+        area_out = power/(eff*w_A);  % Panel area, [m2]
 end
-mass = power / w_kg * (R/1.496e11)^2;  % Mass of array, [kg]
+
+mass = power / w_kg;        % Mass of array, [kg]
+volume = power / w_density; % Volume of stored array, [kg]
 end
 
