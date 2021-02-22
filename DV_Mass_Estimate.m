@@ -7,23 +7,34 @@
 % optimal system is returned
 
 %% Future work
-    % Clean up documentation and annotation
 
-    % Run sim with 2 SC vs 3 SC
-    % 2 orbits that are different
-    % Fully funcitoning lambert factor
-    % Eprop volume definition
-    % Fuel dumping funcitonality
-    % Catalog all potential propulsion
-    % Add margins on values
-    % Get better PP costs
-    % Add in other power draws, masses, and volumes?
+% Coverse about E-prop first, make decision w/ Clarkin (Colton)
+% Fuel dump functionality
+% Develop radiator sizing models
+% Get Ryan up to speed on things (Colton and Joey)
+
+% Ryan:
+%   - Find margins and factors for all systems
+%   - Add any mass, power draws, and volume additions from SMAP
+%   - Run sensitivity studies
+
+% Delageted Work:
+%   - Orbits: Expand (and fix) lambert factor model (Joey oversees)
+%             Expand gravity assist data processing model (Colton oversees)
+%   - Power: Create new power functions/options (Ryan)
+%   - Propulsion: Create better structure, volume, etc. (Ryan) 
+%                 Catolog all options (Ryan)
+%                 Get better preposition costs (Ryan)
+%   - GNC: Get better funciton of flyby velocity (Ryan)
+
+
+
 %% Inputs
 
 
 
 clear
-clc
+ clc
 close all
 
 %input orbit data, include numbers and rendevous location for non-instantanous factor
@@ -62,6 +73,52 @@ prop_scheme = [R4D;XR100_2;R4D];
 % Size of simulation
 numR2 = 6;
 numMass = 6;
+
+
+
+
+
+
+%% MEGA ROSA w/ radiators
+
+orbitname = 'Orb_1.0x1.15AU_10AULim';
+orbit = [1,1.15]; %AU
+preposition_DV1 = 3000; %m/s   ---> launch vehicle
+preposition_DV2 = 300; %m/s    ---> burn 1
+LV_mass_capacity = 1; % Fraction of carried launch vehicle mass to capacity
+
+mass_payload = 600 + 750 + 3000; %kg
+flyby_velocity_p = [0,0,10]; % [a,b,c] where flyby velocity (km/s) = a^2x + bx + c where x is reciprocal of heliocentric range in 1/AU
+power_payload = 0; %W
+volume_payload = 10; %m^3
+R_max = [3, 7]; %Range of heliocentric rendevous design pts, AU
+m_break = [.01,.2]; %Range of mass breakdown (propmass of departure stage/propmass of arrival and departure stages)
+
+% prop = [8];
+%                   1 - 0 for non-impulsive, []|| Thrust for impulsive, [N]
+%                   2 - Thruster dry mass, [kg]
+%                   3 - Isp, [s]
+%                   4 - Power required, [W]
+%                   5 - System Volume (m^3)
+%                   6 - Mixing Ratio (O/F)
+%                   7 - Oxidizer Density (kg/m^3)
+%                   8 - Fuel Density (kg/m^3)
+
+XR100 =   [5,  250, 5000, 0,0,inf,1000,0]; % XR-100 systems (GUESS IS 1000kg/m^3!!)
+XR100_2 = [10, 500, 5000, 0,0,inf,1000,inf]; %2 XR-100 systems (GUESS IS 1000kg/m^3!!)
+XR100_3 = [15, 750, 5000, 0,0,inf,1000,inf]; %2 XR-100 systems (GUESS IS 1000kg/m^3!!)
+% R4D = [0, 3.63, 312, 46]; % 1 R4D system
+R4D = [0, 3.63, 312, 0, 0, 1.65, 1440, 880]; % 1 R4D system
+
+
+% prop_scheme = [preposition_DV2, departure_DV, arrival_DV] ?Can we remove?
+prop_scheme = [R4D;XR100_3;R4D];
+
+% Size of simulation
+numR2 = 6;
+numMass = 6;
+
+
 
 %% Current Assumptions (function assumptions not included)
 
