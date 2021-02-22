@@ -15,17 +15,21 @@ dv1 = DV1(ii,jj);
 dv2 = DV2(ii,jj);
 v_total = V_total(ii,jj)*V_max;
 
-m3 = mass_array1(1);
+m2 = mass_array1(1);
 
 [~,power_mass4,power_area4,V_payload_SP] = panel_power(R2_ii, [], power_payload); 
-[~,~,~,V2_SP] = panel_power(R1, [], prop_scheme(2,4)); 
+[~,m2_SP,~,V2_SP] = panel_power(R1, [], prop_scheme(2,4)); 
 V2_SP = V2_SP-V_payload_SP;
+m2_SP = m2_SP - power_mass4;
 
-[mass_array2,power_area2,~,V2] = prop_sizing1(m3, power_area4, R1, dv1, prop_scheme(2,:));
-m2 = mass_array2(1);
+[mass_array2,power_area2,~,V2] = prop_sizing1(m2, power_area4, R1, dv1, prop_scheme(2,:));
+m3 = mass_array2(1);
+% [~,~, Dv1,~,~] = prop_sizing2(m3, m2, power_area4, R1, prop_scheme(2,:));
 
-[mass_array3,power_area3,~,V3] = prop_sizing1(m2, power_area4, R2_ii, dv2, prop_scheme(3,:));
+
+[mass_array3,power_area3,~,V3] = prop_sizing1(m3, power_area4, R2_ii, dv2, prop_scheme(3,:));
 m4 = mass_array3(1);
+% [~,~, Dv2,~,~] = prop_sizing2(m4, m3, power_area4, R2_ii, prop_scheme(3,:));
 
 power_area1 = power_area2;
 

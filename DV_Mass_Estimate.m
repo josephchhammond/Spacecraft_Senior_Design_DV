@@ -60,8 +60,8 @@ R4D = [0, 3.63, 312, 0, 0, 1.65, 1440, 880]; % 1 R4D system
 prop_scheme = [R4D;XR100_2;R4D];
 
 % Size of simulation
-numR2 = 6;
-numMass = 6;
+numR2 = 2;
+numMass = 2;
 
 %% Current Assumptions (function assumptions not included)
 

@@ -11,7 +11,7 @@ function [mass_array,power_area,dt,V] = ...
 % - Constant thrust, no transients on startup/shutdown
 %   
 % Inputs:
-% payload_mass[1]: Mass of payload, [kg]
+% total_mass[1]: Mass of entire stage, [kg]
 % power_area[1]: Total area of solar array on payload, [m2]
 % R[1]: Distance from sun, [AU]
 % dv[1]: Delta-V required for burn, [m/s]

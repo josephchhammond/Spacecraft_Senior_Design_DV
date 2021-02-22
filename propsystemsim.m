@@ -75,8 +75,8 @@ for ii = 1:numR2
             error('Mass breakdown error')
         end
         % Create system and develop performance outputs  
-        [~,~, dv2,dt2,V2] = prop_sizing2(m4, m3, 0, R2_temp, prop_scheme(3,:));
-        [~,~, dv1,dt1,V1] = prop_sizing2(m3, m2, 0, R1, prop_scheme(2,:));
+        [~,~, dv2,dt2,V2] = prop_sizing2(m4, m3, payload_SP_area, R2_temp, prop_scheme(3,:));
+        [~,~, dv1,dt1,V1] = prop_sizing2(m3, m2, payload_SP_area, R1, prop_scheme(2,:));
         
         
         v_total = V1 + V2;
