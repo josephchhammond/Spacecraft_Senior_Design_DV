@@ -79,7 +79,7 @@ for ii = 1:numR2
         [~,~, dv1,dt1,V1] = prop_sizing2(m3, m2, payload_SP_area, R1, prop_scheme(2,:));
         
         
-        v_total = V1 + V2;
+        v_total = V1 + V2 + V_payload_panels;
         %Check for any unrealistic answers (negative or imaginary)
         if dv2 ~= norm(dv2) || dv1 ~= norm(dv1) || v_total~= norm(v_total)
             dv2 = 0;

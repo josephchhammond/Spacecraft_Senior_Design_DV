@@ -37,7 +37,7 @@ mass_payload = 600; %kg
 flyby_velocity_p = [0,0,10]; % [a,b,c] where flyby velocity (km/s) = a^2x + bx + c where x is reciprocal of heliocentric range in 1/AU
 power_payload = 500; %W
 volume_payload = 10; %m^3
-R_max = [3, 11]; %Range of heliocentric rendevous design pts, AU
+R_max = [3, 7]; %Range of heliocentric rendevous design pts, AU
 m_break = [.05,.4]; %Range of mass breakdown (propmass of departure stage/propmass of arrival and departure stages)
 
 % prop = [8];
@@ -60,8 +60,8 @@ R4D = [0, 3.63, 312, 0, 0, 1.65, 1440, 880]; % 1 R4D system
 prop_scheme = [R4D;XR100_2;R4D];
 
 % Size of simulation
-numR2 = 2;
-numMass = 2;
+numR2 = 6;
+numMass = 6;
 
 %% Current Assumptions (function assumptions not included)
 
@@ -145,7 +145,7 @@ end
 
  t_taken = toc;
  t_taken = t_taken + t_est;
- fprintf("%.1f s Total Runtime Runtime, %.2f s/system\n",t_est,t_est/(numR2*numMass)) %display time taken
+ fprintf("%.1f s Total Runtime Runtime, %.2f s/system\n",t_taken,t_taken/(numR2*numMass)) %display time taken
 
 %% Display Results
 results(PercentCoverage,preposition_DV1,preposition_DV2,V_total,DV1,DV2,mass_array2,R2,m_break_array,mass_payload,power_payload,prop_scheme,R1,V_max,V2,volume_payload)
