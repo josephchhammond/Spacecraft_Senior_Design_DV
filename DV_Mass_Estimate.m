@@ -8,24 +8,24 @@
 
 %% Future work
 
-% Coverse about E-prop first, make decision w/ Clarkin (Colton)
-% Fuel dump functionality
-% Develop radiator sizing models
-% Get Ryan up to speed on things (Colton and Joey)
+% Coverse about E-prop first, make decision w/ Clarkin (Colton)             Fri 2/26
+% Fuel dump functionality                                                   Mon 3/1
+% Develop radiator sizing models                                            Mon 3/1
+% Get Ryan up to speed on things (Colton and Joey)                          Wed 2/24
 
 % Ryan:
-%   - Find margins and factors for all systems
-%   - Add any mass, power draws, and volume additions from SMAP
-%   - Run sensitivity studies
+%   - Find margins and factors for all systems                              Mon 3/1
+%   - Add any mass, power draws, and volume additions from SMAP             Mon 3/1
+%   - Run sensitivity studies, determine mission concept                    Fri 3/6
 
 % Delageted Work:
-%   - Orbits: Expand (and fix) lambert factor model (Joey oversees)
-%             Expand gravity assist data processing model (Colton oversees)
-%   - Power: Create new power functions/options (Ryan)
-%   - Propulsion: Create better structure, volume, etc. (Ryan) 
-%                 Catolog all options (Ryan)
-%                 Get better preposition costs (Ryan)
-%   - GNC: Get better funciton of flyby velocity (Ryan)
+%   - Orbits: Expand (and fix) lambert factor model (Joey oversees)         Fri 3/6
+%             Expand gravity assist data processing model (Colton oversees) Fri 3/6
+%   - Power: Create new power functions/options (Ryan)                      Mon 3/1
+%   - Propulsion: Create better structure, volume, etc. (Ryan)              Mon 3/1 
+%                 Catolog all options (Ryan)                                Mon 3/1
+%                 Get better preposition costs (Ryan)                       Mon 3/1
+%   - GNC: Get better funciton of flyby velocity (Ryan)                     Mon 3/1
 
 
 
