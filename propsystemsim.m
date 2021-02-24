@@ -20,8 +20,6 @@ function [DV1, DV2, DT1, DT2, V, R2, m_break] = propsystemsim(m_total,mass_paylo
 %   R1 = heliocentric range at departure design point, Au
 %   R_max = minimum and maximum design points for payload design point, Au
 % 
-% Assumptions:
-%   Minimum mass breakdown is 10% and maximum mass breakdown is 90%
 %
 % Outputs:
 % Arrays in nxn format with R varied in the 1st dimension and m_breakdown
