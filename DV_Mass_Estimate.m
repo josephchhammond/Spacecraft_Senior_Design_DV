@@ -30,6 +30,30 @@
 
 
 % Consider coms power draw (distance traveled and what power draw is)
+
+
+
+
+
+
+
+
+% Dv2  -> Dv1_max and dt1_max
+% Dv1 is related to Dv2
+
+% so 
+% DV2 can range from 0-DV2
+% This coresponds to a DV1_max and a dt1_max
+% Knowing engine, DV1 can be reused to find dt
+
+
+% data shows linear relationship can be assumed, calculate DV1 max and then
+% use to find DV1 for any given DV2
+
+
+
+
+
 %% Inputs
 
 
@@ -52,8 +76,8 @@ volume_payload = 10; %m^3 (From SPaM)
 
 R_max = [3, 7]; %Range of heliocentric rendevous design pts, AU (User input)
 m_break = [.05,.4]; %Range of mass breakdown (propmass of departure stage/propmass of arrival and departure stages) (User input)
-numR2 = 2; % Simulation size (User input)
-numMass = 2; % Simulation size (User input)
+numR2 = 1; % Simulation size (User input)
+numMass = 1; % Simulation size (User input)
 
 % prop = [8];
 %                   1 - 0 for chemprop (and impulsive) || Thrust for eprop (and non-impulsive), [N]
@@ -120,7 +144,7 @@ m2 = mass_array2(1);
 
 
 % Simulate a variety of proposed systems
-[DV1, DV2, DT1, DT2, V, R2,m_break_array] = propsystemsim(m2, mass_payload, power_payload, prop_scheme, R1, R_max,m_break,numR2,numMass);
+[DV1, DV2, DV1_MAX, DT1, DT2, V, R2,m_break_array,m_test] = propsystemsim(m2, mass_payload, power_payload, prop_scheme, R1, R_max,m_break,numR2,numMass);
 V_total = (V + V2 + volume_payload)/V_max;
 
 
@@ -132,19 +156,31 @@ PercentCoverage = zeros(numR2,numMass); %preallocate coverage matrix
 
 
 
-tic 
+% tic 
 
 for ii = 1:size(DV1,1)
     for jj = 1:size(DV1,2)
         Vsys = V_total(ii,jj);
         DV1sys = DV1(ii,jj); %pull single DV1 for system to check
         DV2sys = DV2(ii,jj); %pull single DV2 for system to check
+            DV1_MAXsys = DV1_MAX(ii,jj);
         tburn1 = DT1(ii,jj); %pull single tburn1 for system to check
         tburn2 = DT2(ii,jj); %pull single tburn2 for system to check
         R2sys = R2(ii);      %pull single R2 for system to check (should this be ii or jj?)
-        SuccessList = CheckSystem(orbitname,PosNum,Vsys,DV1sys,DV2sys,tburn1,tburn2,R2sys,p1,p2,flyby_velocity_p,maindata); %produce list of successful ISOs
+        m2 = m_test(ii,jj,1);
+        m3 = m_test(ii,jj,2);
+        
+        tic
+        SuccessList = CheckSystem_test(orbitname,PosNum,Vsys,DV1sys,DV2sys,DV1_MAXsys, tburn1,tburn2,R2sys,p1,p2,flyby_velocity_p,maindata,prop_scheme,m2,m3); %produce list of successful ISOs
         PercentCoverage_sys = MixOrbitPositions(SuccessList,SuccessList); %check 2 spacecraft in the same orbit
         [PercentCoverage(ii,jj),~] = BestCombo(PercentCoverage_sys); %checks each spacing for best average coverage, not currently saving spacing value.
+        t1 = toc
+        
+        tic
+        SuccessList1 = CheckSystem(orbitname,PosNum,Vsys,DV1sys,DV2sys, tburn1,tburn2,R2sys,p1,p2,flyby_velocity_p,maindata); %produce list of successful ISOs
+        PercentCoverage_sys1 = MixOrbitPositions(SuccessList1,SuccessList1); %check 2 spacecraft in the same orbit
+        [PercentCoverage1(ii,jj),~] = BestCombo(PercentCoverage_sys1); %checks each spacing for best average coverage, not currently saving spacing value.
+        t2 = toc
         
         if ii == 1 && jj == 1
 %             fprintf("0%%\n") %indicate loop start

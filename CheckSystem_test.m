@@ -1,4 +1,4 @@
-function [Success] = CheckSystem(OrbitName,PosNum,Vsys,DV1sys,DV2sys,tburn1,tburn2,R2sys,p1_adjust,p2_adjust,p_flyby,MainData)
+function [Success] = CheckSystem_test(OrbitName,PosNum,Vsys,DV1sys,DV2sys,DV1_MAXsys,tburn1,tburn2,R2sys,p1_adjust,p2_adjust,p_flyby,MainData,prop_scheme,m1,m2)
 %Takes the info about which orbits data to check along with prop system values and
 %computes a percent success by calling the other functions defined below.
 %
@@ -29,9 +29,18 @@ function [Success] = CheckSystem(OrbitName,PosNum,Vsys,DV1sys,DV2sys,tburn1,tbur
     R2sys = R2sys*AU; % adjust to AU
     DV1sys = DV1sys/1000; %convert to km/s
     DV2sys = DV2sys/1000; %convert to km/s
-    
     Success = []; %create empty variable
+
     
+    
+    F1 = prop_scheme(2,1); %Departure: F=thrust [N], Isp=specific impulse [s]
+    Isp1 = prop_scheme(2,3); %Departure: F=thrust [N], Isp=specific impulse [s]
+    Isp2 = prop_scheme(3,3); %Arrival: Isp=specific impulse [s]
+    g = 9.81; %m/s
+    
+    m1_burned = tburn1*F1 / (g*Isp1); %kg
+    m2_burned = m2 * (1-exp(-DV2sys*1000/(Isp2*g))); %kg
+      
 %if input is zero, loop through positions 1 through 12 and save data after each run
 %otherwise just check orbit listed
     if PosNum == 0 %set limits to all include all orbit positions
@@ -50,7 +59,7 @@ for jj = a:b %for each orbit position
     ISOsuccess = zeros(n,1); %initalize the ISOsuccess vector as all zeros
     for ii = 1:n %for each ISO
         [DV1data,DV2data,dtdata,R2data] = readISOdata(OrbitData,ii); %pulls the data for the ii ISO
-        [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,DV2sys,tburn1,tburn2,R2sys,p1_adjust,p2_adjust,p_flyby); %checks the ISO data agianst system data
+        [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,DV2sys,DV1_MAXsys,tburn1,tburn2,R2sys,p1_adjust,p2_adjust,p_flyby,m1,m2,m1_burned,m2_burned,Isp1,Isp2,F1); %checks the ISO data agianst system data
         num_good_transfers = sum(pass_fail,'all');
         if num_good_transfers > 0 %if any transfer to the ISO succeeded, mark that ISO as a success
             ISOsuccess(ii) = 1;
@@ -99,7 +108,7 @@ function [DV1data,DV2data,dtdata,R2data] = readISOdata(OrbitData,ISOnum)
     R2data  = OrbitData.R2{ISOnum,1};
 end
 
-function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,DV2sys,tburn1,tburn2,R2sys,p1_adjust,p2_adjust,p_flyby)
+function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,DV2sys,DV1_MAXsys,tburn1,tburn2,R2sys,p1_adjust,p2_adjust,p_flyby,m1,m2,m1_burned,m2_burned,Isp1,Isp2,F1)
 % Converts the provided orbits data to a pass fail metric based on the system parameters
 %
 % Inputs:
@@ -130,19 +139,53 @@ function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,D
 
     crit1 = R2data<R2sys; %we are capable than going further than this ISO
     
-    fraction = 0.5; %change to higher fidelity model later *ASSUMPTION ALERT*
-    crit2 = fraction*dtdata_ >= tburn1; %our burn is less than some fraction of the transfer
-    crit3 = fraction*dtdata_ >= tburn2;
-
 %adjust DV values
     maxflyby = polyval(p_flyby,R2data);
     DV2adj_ = max(DV2data - maxflyby,0);
     
-    DV1adj = DV_adjustment(DV1data,p1_adjust,tburn1,dtdata);
-    DV2adj = DV_adjustment(DV2adj_,p2_adjust,tburn1,dtdata);
     
-    crit4 = DV1adj <= DV1sys; %check that the system has enough DV
-    crit5 = DV2adj <= DV2sys;
+
+    %While loop alculates fuel dumping and burn time adjustment on an orbit
+    %by orbit basis
+    error = 10^10;
+    tburn1_ii = tburn1;
+    g = 9.81; %m/s^2
+
+    while error > 3600*24 %get on average, within a day of burntime accuracy
+        %Adjust flyby mission REQUIRMENTS for given burntime
+        DV1_req_ii = DV_adjustment(DV1data,p1_adjust,tburn1_ii,dtdata);
+        DV2_req_ii = DV_adjustment(DV2adj_,p2_adjust,tburn1_ii,dtdata);
+        %Dump arrival fuel based on mission requirements to find SYSTEM DV1 for a
+        %given DV2 REQUIRMENT
+        DV1_sys_ii = DV1_MAXsys + (DV1sys-DV1_MAXsys)/DV2sys * DV2_req_ii; %assuming a linear relationship between min and max fuel dump conditions, find required DV1 for this burn req
+
+        % Find arrival prop mass dumped, if possible
+        dm2_burned =  max(m2_burned - m2 * (1-exp(-DV2_req_ii*1000/(Isp2*g))),0);
+        % Find departure prop mass dumped, if possible
+        %dm1_burned = max(m1_burned - tburn1_ii*F1 / (g*Isp1),0); %kg
+        dm1_burned =  max(m1_burned - m1 * (1-exp(-DV1_req_ii*1000/(Isp1*g))),0);
+        % Find new starting mass FOR A GIVEN SYSTEM DV1 and DV2
+        m1_adj = m1 - dm1_burned - dm2_burned;
+        
+        %Find new departure burn time FOR THE REQUIREMENT
+        tburn1_adj = m1_adj*Isp1*g/F1 * (1-exp(-DV1_req_ii*1000/(Isp1*g))); %s
+        %Find error and continue iteration
+        error = mean(mean((tburn1_adj - tburn1_ii)));
+        tburn1_ii = tburn1_adj;
+    end
+
+    fraction = 0.5; %change to higher fidelity model later *ASSUMPTION ALERT*
+    crit2 = fraction*dtdata_ >= tburn1; %our burn is less than some fraction of the transfer
+    crit3 = fraction*dtdata_ >= tburn2;
+
+    
+    DV1sys  = DV1_sys_ii;
+    DV2sys = DV2sys;
+    DV1req = DV1_req_ii;
+    DV2req = DV2_req_ii;
+    
+    crit4 = DV2req <= DV2sys; %check system has enough fuel for arrival burn
+    crit5 = DV1req <= DV1sys; %that a best case fuel dump for both stages is possible for departurne burn
     
 %Check Volume
     crit6 = Vsys <= 1;
