@@ -79,8 +79,6 @@ for ii = 1:numR2
         [mass_array_3,~, dv2,dt2,V2] = prop_sizing2(m4, m3, payload_SP_area, R2_temp, prop_scheme(3,:));
         [mass_array_2,~, dv1,dt1,V1] = prop_sizing2(m3, m2, payload_SP_area, R1, prop_scheme(2,:));
         
-        mass_array_2
-        mass_array_3
         
         v_total = V1 + V2 + V_payload_panels;
  

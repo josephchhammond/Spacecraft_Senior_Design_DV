@@ -150,11 +150,22 @@ function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,D
     error = 10^10;
     tburn1_ii = tburn1;
     g = 9.81; %m/s^2
-
-    while error > 3600*24 %get on average, within a day of burntime accuracy
-        %Adjust flyby mission REQUIRMENTS for given burntime
-        DV1_req_ii = DV_adjustment(DV1data,p1_adjust,tburn1_ii,dtdata);
+    Isp_fueldump1 = 300; %s
+    Isp_fueldump2 = 300; %s
+    DV1_fueldump1 = 0;%m/s
+    DV1_fueldump2 = 0;%m/s
+    
+    % Iterate fuel dumping and burn time calcs until convergence
+    % Solution convergence is an average of a day of burntime error per trajectory
+    % Burntime error defined as change in burntime estimate
+    while error > 3600*24 
+        % Calculate how much non instantaneous  DV is required
+        DV1_noninst = DV1data - DV1_fueldump1 - DV1_fueldump2;
+  
+        %Adjust flyby mission REQUIRMENTS for given burntime and DV
+        DV1_req_ii = DV_adjustment(DV1_noninst,p1_adjust,tburn1_ii,dtdata);
         DV2_req_ii = DV_adjustment(DV2adj_,p2_adjust,tburn1_ii,dtdata);
+        
         %Dump arrival fuel based on mission requirements to find SYSTEM DV1 for a
         %given DV2 REQUIRMENT
         DV1_sys_ii = DV1_MAXsys + (DV1sys-DV1_MAXsys)/DV2sys * DV2_req_ii; %assuming a linear relationship between min and max fuel dump conditions, find required DV1 for this burn req
@@ -166,14 +177,21 @@ function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,D
         dm1_burned =  max(m1_burned - m1 * (1-exp(-DV1_req_ii*1000/(Isp1*g))),0);
         % Find new starting mass FOR A GIVEN SYSTEM DV1 and DV2
         m1_adj = m1 - dm1_burned - dm2_burned;
-        
+
+        %Assume fuel dumps are both instantaneous w/ 300s ISP (TEMP) with electrical dump
+        %first
+        DV1_fueldump1 = -Isp_fueldump1*g*log((m1-dm1_burned)./m1); %m/s
+        DV1_fueldump2 = -Isp_fueldump2*g*log((m1-dm1_burned - dm2_burned)./(m1-dm1_burned)); %m/s
+   
         %Find new departure burn time FOR THE REQUIREMENT
-        tburn1_adj = m1_adj*Isp1*g/F1 * (1-exp(-DV1_req_ii*1000/(Isp1*g))); %s
+        tburn1_adj = m1_adj*Isp1*g/F1 * (1-exp(-DV1_req_ii/(Isp1*g))); %s
         %Find error and continue iteration
         error = mean(mean((tburn1_adj - tburn1_ii)));
         tburn1_ii = tburn1_adj;
     end
 
+
+    
     fraction = 0.5; %change to higher fidelity model later *ASSUMPTION ALERT*
     crit2 = fraction*dtdata_ >= tburn1; %our burn is less than some fraction of the transfer
     crit3 = fraction*dtdata_ >= tburn2;
