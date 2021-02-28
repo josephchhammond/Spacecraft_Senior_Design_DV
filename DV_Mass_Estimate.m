@@ -8,7 +8,6 @@
 
 %% Future work
 
-% Coverse about E-prop first, make decision w/ Clarkin (Colton)             Fri 2/26
 % Fuel dump functionality                                                   Mon 3/1
 % Develop radiator sizing models                                            Mon 3/1
 
@@ -31,24 +30,6 @@
 
 % Consider coms power draw (distance traveled and what power draw is)
 
-
-
-
-
-
-
-
-% Dv2  -> Dv1_max and dt1_max
-% Dv1 is related to Dv2
-
-% so 
-% DV2 can range from 0-DV2
-% This coresponds to a DV1_max and a dt1_max
-% Knowing engine, DV1 can be reused to find dt
-
-
-% data shows linear relationship can be assumed, calculate DV1 max and then
-% use to find DV1 for any given DV2
 
 
 

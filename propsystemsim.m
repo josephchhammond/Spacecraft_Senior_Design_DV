@@ -75,11 +75,28 @@ for ii = 1:numR2
         if (m4 > m3) || (m3 > m2)
             error('Mass breakdown error')
         end
-        % Create system and develop performance outputs  
-        [mass_array_3,~, dv2,dt2,V2] = prop_sizing2(m4, m3, payload_SP_area, R2_temp, prop_scheme(3,:));
-        [mass_array_2,~, dv1,dt1,V1] = prop_sizing2(m3, m2, payload_SP_area, R1, prop_scheme(2,:));
+        % Create system and develop performance outputs
         
         
+        % Create thrust plate funtions (propsizing3 and propsizing4 that w/ mass breakdown and DV1, DV2, rather than 
+        % Create function for outputting DV1 non-inst vs DV2 inst, dt vs DV2 inst, DV1 bonus vs DV2 inst
+        
+        % Change check function (easy)
+        % Get new results outputs (lets just pass in the mass breakdown
+        % calcs)
+        [mass_array,power_area,dv1, dv2, dt,V] = ...
+    prop_sizing4(m4, m2, m_break_temp, payload_SP_area, R1, prop_scheme(2,:), prop_scheme(3,:));
+
+        [out1] = prop_capability(mass_array, prop_scheme(2,:), prop_scheme(3,:));
+        
+        
+        
+         [mass_array_3,~, dv2,dt2,V2] = prop_sizing2(m4, m3, payload_SP_area, R2_temp, prop_scheme(3,:));
+         [mass_array_2,~, dv1,dt1,V1] = prop_sizing2(m3, m2, payload_SP_area, R1, prop_scheme(2,:));
+        
+
+
+
         v_total = V1 + V2 + V_payload_panels;
  
         
