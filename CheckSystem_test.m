@@ -139,8 +139,8 @@ function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,D
 
     crit1 = R2data<= R2sys; %we are capable than going further than this ISO
     
-    DV2data = DV2data.*crit1; %set the burn requirements to 0 for loss cases, computation ease
-    DV1data = DV1data.*crit1; %set the burn requirements to 0 for loss cases, computation ease
+ %   DV2data = DV2data.*crit1; %set the burn requirements to 0 for loss cases, computation ease
+ %   DV1data = DV1data.*crit1; %set the burn requirements to 0 for loss cases, computation ease
 
         
     %adjust DV values
@@ -158,10 +158,22 @@ function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,D
     DV1_fueldump1 = 0;%m/s
     DV1_fueldump2 = 0;%m/s
     
+    dtburn_dt_max = 0.5; %change to higher fidelity model later *ASSUMPTION ALERT*
+    
     % Iterate fuel dumping and burn time calcs until convergence
     % Solution convergence is an average of a day of burntime error per trajectory
     % Burntime error defined as change in burntime estimate
     while error > 3600*24 
+        DV2_factor = DV2sys/DV2data;
+        [dtburn_dt] = DV_adjustment2(DV2_factor,p,dtburn_dt_max);
+        
+        
+        
+        
+        
+        
+        
+        
         % Calculate how much non instantaneous  DV is required
         DV1_noninst = DV1data - DV1_fueldump1 - DV1_fueldump2;
   
