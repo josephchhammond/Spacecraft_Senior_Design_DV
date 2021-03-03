@@ -132,86 +132,106 @@ function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,D
 %Written by Colton Hook on 2/8/2021 - This is V4
 
 
+
+    %While loop alculates fuel dumping and burn time adjustment on an orbit
+    %by orbit basis
+    g = 9.81; %m/s^2
+    Isp_dump1 = 300; %s
+    Isp_dump2 = 300; %s
+    T1
+    Isp1
+    Isp2
+    m_prop1;
+    m_prop2;
+    m3 ;%inert mass (mass after fuel is burned)
+    DV2sys;
+    dtburn_dt_max = 0.5; %change to higher fidelity model later *ASSUMPTION ALERT*
+    
+    
+    
+    
+    
+    
+    
+    
 %convert dtdata into a 30x30 by extending it down each column
     dtdata_ = repmat(dtdata,30,1);
 
 %crit means criteria
-
     crit1 = R2data<= R2sys; %we are capable than going further than this ISO
-    
-    DV2data = DV2data.*crit1; %set the burn requirements to 0 for loss cases, computation ease
-    DV1data = DV1data.*crit1; %set the burn requirements to 0 for loss cases, computation ease
-
         
-    %adjust DV values
-    maxflyby = polyval(p_flyby,R2data);
+    % Calculation works backwards in burns to evaluate feasibility. General
+    % steps of model are as follows:
+    %   1. Check if our system can make our arrival burn. One of three
+    %   possibilities occurs: 
+    %       a) We cant make the arrival burn even at a perfect
+    %       instantaneous departure
+    %       b) We can make the arrival under a limited amount of
+    %       "non-instantaenty", and we set an appropriate burn time limit
+    %       c) We can make the arrival past burn time limit, so we dump
+    %       extra fuel before departure
+    %   2. For a given burn time, we find how much DV we get out of our
+    %   departure system and how much fuel has to be dumped
+    %   3. For both fuel dumps, we find how much extra DV we get before we
+    %   depart
+    %   4. We check if our system can make the arrival and departure
+    %   requirements for our given burns and dumps
+    
+    
+    
+ % DV2 (fourth burn) 
+    % Reduce arrival requirements based on flyby velocity
+    maxflyby = polyval(p_flyby,R2data); 
     DV2adj_ = max(DV2data - maxflyby,0);
     
+    % Find how many times we can cover the arrival requirements
+    DV2_factor = DV2sys./DV2adj_;
     
-    %While loop alculates fuel dumping and burn time adjustment on an orbit
-    %by orbit basis
-    error = 10^10;
-    tburn1_ii = tburn1;
-    g = 9.81; %m/s^2
-    Isp_fueldump1 = 300; %s
-    Isp_fueldump2 = 300; %s
-    DV1_fueldump1 = 0;%m/s
-    DV1_fueldump2 = 0;%m/s
+    % Find how much burntime we can allow for this system and actual DV
+    % requirements for our arrival stage
+        % bad systems have dtburn_dt < 0
+        % good systems should have dtburn_dt 0-.5
+        % really good systems have dtburn_dt .5 
+    [dtburn_dt,DV2_factor_adj] = DV_adjustment2(DV2_factor,p,dtburn_dt_max);    % Iterate fuel dumping and burn time calcs until convergence
+    DV2_req = DV2_factor_adj.*DV2adj_;
+    dtburn = dtdata_.*dtburn_dt;
     
-    % Iterate fuel dumping and burn time calcs until convergence
-    % Solution convergence is an average of a day of burntime error per trajectory
-    % Burntime error defined as change in burntime estimate
-    while error > 3600*24 
-        % Calculate how much non instantaneous  DV is required
-        DV1_noninst = DV1data - DV1_fueldump1 - DV1_fueldump2;
-  
-        %Adjust flyby mission REQUIRMENTS for given burntime and DV
-        DV1_req_ii = DV_adjustment(DV1_noninst,p1_adjust,tburn1_ii,dtdata);
-        DV2_req_ii = DV_adjustment(DV2adj_,p2_adjust,tburn1_ii,dtdata);
-        
-        %Dump arrival fuel based on mission requirements to find SYSTEM DV1 for a
-        %given DV2 REQUIRMENT
-        DV1_sys_ii = DV1_MAXsys + (DV1sys-DV1_MAXsys)/DV2sys * DV2_req_ii; %assuming a linear relationship between min and max fuel dump conditions, find required DV1 for this burn req
+    
+    
+    f_2 = exp(DV2_req/(g*-Isp2));
+    m_burned2 = f_2*m3/(1-f_2);
+    m_dump2 = m_prop2 - m_burned2;
 
-        % Find arrival prop mass dumped, if possible
-        dm2_burned =  max(m2_burned - m2 * (1-exp(-DV2_req_ii*1000/(Isp2*g))),0);
-        % Find departure prop mass dumped, if possible
-        %dm1_burned = max(m1_burned - tburn1_ii*F1 / (g*Isp1),0); %kg
-        dm1_burned =  max(m1_burned - m1 * (1-exp(-DV1_req_ii*1000/(Isp1*g))),0);
-        % Find new starting mass FOR A GIVEN SYSTEM DV1 and DV2
-        m1_adj = m1 - dm1_burned - dm2_burned;
-
-        %Assume fuel dumps are both instantaneous w/ 300s ISP (TEMP) with electrical dump
-        %first
-        DV1_fueldump1 = -Isp_fueldump1*g*log((m1-dm1_burned)./m1); %m/s
-        DV1_fueldump2 = -Isp_fueldump2*g*log((m1-dm1_burned - dm2_burned)./(m1-dm1_burned)); %m/s
-   
-        %Find new departure burn time FOR THE REQUIREMENT
-        tburn1_adj = m1_adj*Isp1*g/F1 * (1-exp(-DV1_req_ii/(Isp1*g))); %s
-        %Find error and continue iteration
-        error = mean(mean((tburn1_adj - tburn1_ii)));
-        tburn1_ii = tburn1_adj;
-    end
-
-
+    % DV1 (third burn)
+    m_burned1 = dtburn*T1/(g*Isp1);
+    f_1 = (m3 + m_burned2)/(m3 + m_burned1 + m_burned2);
+    DV1_noninst = -Isp1*g*log(f_1);
+    DV1_factor = DV_adjustment(1,p1_adjust,dtburn_dt,1);
+    DV1_noninst_adj = DV1_noninst ./ DV1_factor;
+    m_dump1 = m_prop1 - m_burned1;
     
-    fraction = 0.5; %change to higher fidelity model later *ASSUMPTION ALERT*
-    crit2 = fraction*dtdata_ >= tburn1; %our burn is less than some fraction of the transfer
-    crit3 = fraction*dtdata_ >= tburn2;
-
+    % DV2 dump (second burn)
+    m_post_dump2 = m3 + m_burned1 + m_burned2;
+    m_pre_dump2 = m_post_dump2 + m_dump2;
+    f_dump2 = m_post_dump2/m_pre_dump2;
+    DV_dump2 = -Isp_dump2*g*log(f_dump2);
     
-    DV1sys  = DV1_sys_ii;
-    DV2sys = DV2sys;
-    DV1req = DV1_req_ii;
-    DV2req = DV2_req_ii;
+    % DV1 dump (first burn)
+    m_post_dump1 = m_pre_dump2;
+    m_pre_dump1 = m_post_dump1 + m_dump1;
+    f_dump1 = m_post_dump1/m_pre_dump1;
+    DV_dump1 = -Isp_dump1*g*log(f_dump1);
     
-    crit4 = DV2req <= DV2sys; %check system has enough fuel for arrival burn
-    crit5 = DV1req <= DV1sys; %that a best case fuel dump for both stages is possible for departurne burn
     
-%Check Volume
-    crit6 = Vsys <= 1;
+    DV1_total = DV_dump1 + DV_dump2 + DV1_noninst_adj;
     
-    pass_fail = crit1 & crit2 & crit3 & crit4 & crit5 & crit6; %which transfers met all 5 criteria
+    
+    crit2 = DV2_factor >= 1; %Check if DV2 is met
+    crit3 = DV1_total >= DV1data; %Check if DV1 is met under burntime limitations
+    crit4 = Vsys <= 1;
+    
+    
+    pass_fail = crit1 & crit2 & crit3 & crit4;
 end
 
 %---------------------------Change Log---------------------------

@@ -37,6 +37,5 @@ check2 = dtburn_dt_max*ones(size(DV_factor));
 excess_check = dtburn_dt > check2;
 dtburn_dt = dtburn_dt - excess_check.*dtburn_dt + dtburn_dt_max.*excess_check;
 
-% Adjust DV_factor based on any new dtburn_dt
 DV_factor_adj = (polyval(p,dtburn_dt)).^.5;
 end

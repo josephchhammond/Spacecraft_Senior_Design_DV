@@ -105,11 +105,11 @@ numMass = 1; % Simulation size (User input)
 XR100 =   [5,  250, 5000, 100000,0,inf,1000,inf]; % XR-100 systems (GUESS IS 1000kg/m^3!!)
 XR100_2 = [10, 500, 5000, 200000,0,inf,1000,inf]; %2 XR-100 systems (GUESS IS 1000kg/m^3!!)
 % R4D = [0, 3.63, 312, 46]; % 1 R4D system
-R4D = [0, 3.63, 312, 0, 0, 1.65, 1440, 880]; % 1 R4D system
+R4D_4 = [0, 25, 312, 0, 0, 1.65, 1440, 880]; % 1 R4D system
 
 
-% prop_scheme = [preposition_DV2; departure_DV; arrival_DV]
-prop_scheme = [R4D;XR100_2;R4D];
+% prop_scheme = [departure_DV; arrival_DV]
+prop_scheme = [XR100_2;R4D_4];
 
 
 
@@ -152,8 +152,8 @@ prop_scheme = [R4D;XR100_2;R4D];
 preposition_system = prop_scheme(1,:);
 R1 = orbit(1);
 
-[mass_array2,P_nom, ~, V2] = prop_sizing_preposition(m1*LV_mass_capacity, R1, preposition_DV2, preposition_system,SMAP);
-m2 = mass_array2(1);
+% [mass_array2,P_nom, ~, V2] = prop_sizing_preposition(m1*LV_mass_capacity, R1, preposition_DV2, preposition_system,SMAP);
+% m2 = mass_array2(1);
 
 
 % Simulate a variety of proposed systems
