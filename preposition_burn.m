@@ -1,5 +1,9 @@
 function [mass_array,power_area,dv1, dv2, dt,V] = ...
-    prop_sizing4(payload_mass, m0, m_break, power_area, R, prop_system1, prop_system2,preposition_DV)
+    preposition_burn(payload_mass, m0, m_break, power_area, R, prop_system1, prop_system2)
+
+
+
+
 % This function calculates performance for a given departure and arrival
 % system on a thrust plate.
 %
@@ -26,20 +30,17 @@ function [mass_array,power_area,dv1, dv2, dt,V] = ...
 %                   6 - Mixing Ratio (O/F)
 %                   7 - Oxidizer Density (kg/m^3)
 %                   8 - Fuel Density (kg/m^3)
-% preposition_DV [1]: Arrival burn DV allocated to prepositioning
 %
 % Outputs:
 % mass_array[1,6]:  Mass of different portions of system [kg]
 %                   1 - Payload mass (Everything not on this stage), [kg]
 %                   2 - Eprop Propellant mass, [kg]
-%                   3 - Chemprop Propellant mass (preposition and arrival, [kg]
+%                   3 - Chemprop Propellant mass, [kg]
 %                   4 - Eprop Propellant structure mass, [kg]
 %                   5 - Chemprop Propellant structure mass, [kg]
 %                   6 - Power mass, [kg]
 %                   7 - Dry mass, [kg]
 %                   8 - Total stage mass, [kg] 
-%                   9 - Chemprop Propellant mass allocated to prepositioning, [kg]
-
 
 % power_area[1]: Total area of solar array required, [m2]
 % dv1[1]: Departure burn DV (assumed both full chemprop and eprop tanks), [m/s]
@@ -48,6 +49,21 @@ function [mass_array,power_area,dv1, dv2, dt,V] = ...
 % V[1]: Volume of system, [m^3]
 %
 % Written by: Joseph Hammond
+
+
+
+
+
+
+
+
+
+dv2_adj = dv2 - preposition_DV;
+
+
+
+
+
 
 g0 = 9.81;      % Gravitational acceleration, [m/s2]
 
@@ -122,26 +138,20 @@ mass_array(5) = m_tank2;
 m_dry = thruster_mass + mass_panels + m_tank1 + m_tank2; % Stage Dry Mass, [kg]
 mass_array(7) = m_dry;
 
-% Preposition burn
-Isp2 = prop_system2(3); %Specific impulse of departure [s]
-f_preposition = exp(-preposition_DV/(Isp2*g0)); % Inert mass fraction of prepositon, [m/s]
-m_prop0 = m0*(1-f_preposition);
-mass_array(9) = m_prop0;
 
 %% Maneuvers
 g0 = 9.81;      % Gravitational acceleration, [m/s2]
-
-% Departure Burn
 Isp1 = prop_system1(3); %Specific impulse of departure [s]
 T1 = prop_system1(1); %Thrust of departure [N]
-f_inert1 = (m0 - m_prop0 - m_prop1)/(m0 - m_prop0); % Inert mass fraction of departure, [m/s2]
+f_inert1 = (m0 - m_prop1)/m0; % Inert mass fraction of departure, [m/s2]
+
 dv1 = -Isp1*g0*log(f_inert1);
 dt = g0*Isp1*m_prop1/T1;
 
-%Arrival Burn
-f_inert2 = (m0 - m_prop0 - m_prop1 - m_prop2)/(m0 - m_prop0 - m_prop1); % Inert mass fraction of arrival, [m/s2]
-dv2 = -Isp2*g0*log(f_inert2);
+Isp2 = prop_system2(3); %Specific impulse of departure [s]
+f_inert2 = (m0-m_prop1-m_prop2)/(m0-m_prop1); % Inert mass fraction of arrival, [m/s2]
 
+dv2 = -Isp2*g0*log(f_inert2);
 %% Volume Assignments
 
 % Departure burn

@@ -1,4 +1,4 @@
-function [Success] = CheckSystem_test(OrbitName,PosNum,Vsys,DV1sys,DV2sys,DV1_MAXsys,tburn1,tburn2,R2sys,p1_adjust,p2_adjust,p_flyby,MainData,prop_scheme,m1,m2)
+function [Success] = CheckSystem_test(OrbitName,PosNum,Vsys,DV1sys,DV2sys,tburn,mass_sys,R2sys,p1_adjust,p2_adjust,p_flyby,MainData,prop_scheme)
 %Takes the info about which orbits data to check along with prop system values and
 %computes a percent success by calling the other functions defined below.
 %
@@ -30,17 +30,28 @@ function [Success] = CheckSystem_test(OrbitName,PosNum,Vsys,DV1sys,DV2sys,DV1_MA
     DV1sys = DV1sys/1000; %convert to km/s
     DV2sys = DV2sys/1000; %convert to km/s
     Success = []; %create empty variable
+    
+    
+    
 
     
     
-    F1 = prop_scheme(2,1); %Departure: F=thrust [N], Isp=specific impulse [s]
-    Isp1 = prop_scheme(2,3); %Departure: F=thrust [N], Isp=specific impulse [s]
-    Isp2 = prop_scheme(3,3); %Arrival: Isp=specific impulse [s]
-    g = 9.81; %m/s
     
-    m1_burned = tburn1*F1 / (g*Isp1); %kg
-    m2_burned = m2 * (1-exp(-DV2sys*1000/(Isp2*g))); %kg
-      
+    F1 = prop_scheme(1,1); %Departure: F=thrust [N], Isp=specific impulse [s]
+    Isp1 = prop_scheme(1,3); %Departure: F=thrust [N], Isp=specific impulse [s]
+    Isp2 = prop_scheme(2,3); %Arrival: Isp=specific impulse [s]
+    
+    Isp_dump1 = 300; %s ASSUMPTION
+    Isp_dump2 = 300; %s ASSUMPTION
+    
+    m_inert = mass_sys(8) - mass_sys(2) - mass_sys(3);
+    m_prop1 = mass_sys(2);
+    m_prop2 = mass_sys(3) - mass_sys(9);
+
+    dtburn_dt_max = 0.5; % *ASSUMPTION ALERT*
+
+
+    
 %if input is zero, loop through positions 1 through 12 and save data after each run
 %otherwise just check orbit listed
     if PosNum == 0 %set limits to all include all orbit positions
@@ -59,7 +70,7 @@ for jj = a:b %for each orbit position
     ISOsuccess = zeros(n,1); %initalize the ISOsuccess vector as all zeros
     for ii = 1:n %for each ISO
         [DV1data,DV2data,dtdata,R2data] = readISOdata(OrbitData,ii); %pulls the data for the ii ISO
-        [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,DV2sys,DV1_MAXsys,tburn1,tburn2,R2sys,p1_adjust,p2_adjust,p_flyby,m1,m2,m1_burned,m2_burned,Isp1,Isp2,F1); %checks the ISO data agianst system data
+        [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,DV2sys,tburn,R2sys,p1_adjust,p2_adjust,p_flyby,F1,Isp1,Isp2,Isp_dump1,Isp_dump2,m_inert,m_prop1,m_prop2,dtburn_dt_max); %checks the ISO data agianst system data
         num_good_transfers = sum(pass_fail,'all');
         if num_good_transfers > 0 %if any transfer to the ISO succeeded, mark that ISO as a success
             ISOsuccess(ii) = 1;
@@ -108,7 +119,7 @@ function [DV1data,DV2data,dtdata,R2data] = readISOdata(OrbitData,ISOnum)
     R2data  = OrbitData.R2{ISOnum,1};
 end
 
-function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,DV2sys,DV1_MAXsys,tburn1,tburn2,R2sys,p1_adjust,p2_adjust,p_flyby,m1,m2,m1_burned,m2_burned,Isp1,Isp2,F1)
+function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,DV2sys,tburn,R2sys,p1_adjust,p2_adjust,p_flyby,F1,Isp1,Isp2,Isp_dump1,Isp_dump2,m_inert,m_prop1,m_prop2,dtburn_dt_max)
 % Converts the provided orbits data to a pass fail metric based on the system parameters
 % Calculation works backwards in burns to evaluate feasibility. General
 % steps of model are as follows:
@@ -157,20 +168,9 @@ function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,D
 
 
 
-%  %Inputs to fix and input
-%     g = 9.81; %m/s^2
-%     Isp_dump1 = 300; %s
-%     Isp_dump2 = 300; %s
-%     T1
-%     Isp1
-%     Isp2
-%     m_prop1;
-%     m_prop2;
-%     m3 ;%inert mass (mass after fuel is burned)
-%     DV2sys;
-%     dtburn_dt_max = 0.5; %change to higher fidelity model later *ASSUMPTION ALERT*
     
- 
+     g = 9.81; %m/s
+
 
 % Convert dtdata into a 30x30 by extending it down each column
     dtdata_ = repmat(dtdata,30,1);
@@ -187,43 +187,43 @@ function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,D
     
     % Find how much burntime we can allow for this system and actual DV
     % requirements for our arrival stage
-        % bad systems have dtburn_dt < 0
-        % good systems should have dtburn_dt 0-.5
-        % really good systems have dtburn_dt .5 
-    [dtburn_dt,DV2_factor_adj] = DV_adjustment2(DV2_factor,p,dtburn_dt_max);    % Iterate fuel dumping and burn time calcs until convergence
+        % Bad systems cant arrive under any circumstances and have unreal dtburn_dt < 0
+        % Good systems can arrive under some amount of non-instantaenty and should have dtburn_dt 0-.5
+        % Great systems are have extra fuel they dump to meet only the max burn time of dtburn_dt .5 
+    [dtburn_dt,DV2_factor_adj] = DV_adjustment2(DV2_factor,p2_adjust,dtburn_dt_max); 
     DV2_req = DV2_factor_adj.*DV2adj_; %Arrival DV specific to this transfer
     dtburn = dtdata_.*dtburn_dt;
     % Find fuel dumped
-    f_2 = exp(DV2_req/(g*-Isp2));
-    m_burned2 = f_2*m3/(1-f_2);
+    f_2 = exp(DV2_req./(g*-Isp2));
+    m_burned2 = f_2.*m_inert./(1-f_2); %%%
     m_dump2 = m_prop2 - m_burned2;
 
 % DV1 (third burn)
     % Based on allowable burn time, find burned fuel on departure stage and
     % how much is saved
-    m_burned1 = dtburn*T1/(g*Isp1);
+    m_burned1 = dtburn.*F1./(g*Isp1);
     m_dump1 = m_prop1 - m_burned1;
     % Find how much departure DV we get, adjusted for non-instantaety
-    f_1 = (m3 + m_burned2)/(m3 + m_burned1 + m_burned2);
-    DV1_noninst = -Isp1*g*log(f_1);
+    f_1 = (m_inert + m_burned2)./(m_inert + m_burned1 + m_burned2); %%%
+    DV1_noninst = -Isp1.*g.*log(f_1);
     DV1_factor = DV_adjustment(1,p1_adjust,dtburn_dt,1);
     DV1_noninst_adj = DV1_noninst ./ DV1_factor;
     
 % DV2 dump (second burn)
     % Find how much DV we get out of dumping extra arrival fuel before
     % departure
-    m_post_dump2 = m3 + m_burned1 + m_burned2;
+    m_post_dump2 = m_inert + m_burned1 + m_burned2;
     m_pre_dump2 = m_post_dump2 + m_dump2;
-    f_dump2 = m_post_dump2/m_pre_dump2;
-    DV_dump2 = -Isp_dump2*g*log(f_dump2);
+    f_dump2 = m_post_dump2./m_pre_dump2; %%%
+    DV_dump2 = -Isp_dump2*g.*log(f_dump2);
     
 % DV1 dump (first burn)
     % Find how much DV we get out of dumping extra departure fuel before
     % departure
     m_post_dump1 = m_pre_dump2;
     m_pre_dump1 = m_post_dump1 + m_dump1;
-    f_dump1 = m_post_dump1/m_pre_dump1;
-    DV_dump1 = -Isp_dump1*g*log(f_dump1);
+    f_dump1 = m_post_dump1./m_pre_dump1;
+    DV_dump1 = -Isp_dump1.*g.*log(f_dump1);
     
 % Tally total departure DV output
     DV1_total = DV_dump1 + DV_dump2 + DV1_noninst_adj;
@@ -255,123 +255,5 @@ end
 %       p2_adjust
 %   changed maxflyby from a constant to polynomial, added input p_flyby
 
-
-
-
-
-
-% following:
-
-% 2 stages are present, Eprop and Chem
-% Any % of DV1 can be burned
-% Any % of DV2 can be burned
-% Additional fuel is "dumped" pre-DV1 with an Isp of 300s, with chem dump
-% first
-
-% Inputs:
-% mass_array[1,6]:  Mass of different portions of system [kg]
-%                   1 - Payload mass (Everything not on this stage), [kg]
-%                   2 - Eprop Propellant mass, [kg]
-%                   3 - Chemprop Propellant mass, [kg]
-%                   4 - Eprop Propellant structure mass, [kg]
-%                   5 - Chemprop Propellant structure mass, [kg]
-%                   6 - Power mass, [kg]
-%                   7 - Dry mass, [kg]
-%                   8 - Total stage mass, [kg] 
-%
-% prop_system1[1,8]: Departure eprop propulsion system characteristics:
-% prop_system2[1,8]: Arrival chempop propulsion system characteristics:
-%                   1 - 0 for non-impulsive, []|| Thrust for impulsive, [N]
-%                   2 - Thruster dry mass, [kg]
-%                   3 - Isp, [s]
-%                   4 - Power required, [W]
-%                   5 - System Volume (m^3)
-%                   6 - Mixing Ratio (O/F)
-%                   7 - Oxidizer Density (kg/m^3)
-%                   8 - Fuel Density (kg/m^3)
-%
-% Written by: Joseph Hammond
-
-
-g =9.81; %m/s^2
-Isp_dump = 300; %s
-Isp1 = prop_system1(3);
-Isp2 = prop_system2(3);
-T1 = prop_system1(1);
-
-m_total = mass_array(8);
-m_prop1 = mass_array(2);
-m_prop2 = mass_array(4);
-m3 = m_total-m_prop1-m_prop2;%inert mass (mass after fuel is burned)
-
-
-
-
-
-f_1 = exp(DV1/(g*-Isp1));
-f_2 = exp(DV2/(g*-Isp2));
-
-m2 = m3/f_2;
-m_dump2 = m3 + m_prop2 - m2;
-
-
-dt_burn = g*Isp1*m_burned1/T1;
-
-        
-DV1_ii = -Isp1*g*log(f_1) -Isp1*g*log(f_1)
-
-
-
-n = 1;
-for ii = 1:100
-    for jj = 1:100
-        m_burned1 = m_prop1*ii/100;
-        m_burned2 = m_prop2*jj/100;
-        m_dumped1 = m_prop1 - m_burned1;
-        m_dumped2 = m_prop2 - m_burned2;
-        
-        m0 = m_total;%mass before fuel dump
-        m1 = m_total - m_dumped1 - m_dumped2;%mass after fuel dump
-        m2 = m1 - m_burned1;%mass after departure
-        
-        f_dump = m1/m0;
-        f_1 = m2/m1;
-        f_2 = m3/m2;
-        
-        DV1_actual(n) = -Isp1*g*log(f_1);
-        DV2_actual(n) = -Isp2*g*log(f_2);
-        dt_actual(n) = g*Isp1*m_burned1/T1;
-        DV_dump(n) = -Isp_dump*g*log(f_dump);
-        
-        n = n+1;
-    end
-end
-
-num = 1;
-for ii = 1:100
-    for jj = 1:100
-        
-    end
-end
-
-figure
-title('DV1 vs DV2')
-plot(DV1_actual,DV2_actual,'x')
-xlabel('DV1 (m/s)')
-ylabel('DV2 (m/s)')
-
-figure
-title('DVdump vs DV2')
-plot(DV_dump,DV2_actual,'x')
-xlabel('DV1 (m/s)')
-ylabel('DV2 (m/s)')
-
-figure
-title('Time vs DV1')
-plot(dt_actual,DV1_actual,'x')
-xlabel('Time (s)')
-ylabel('DV1 (m/s)')
-
-out1 = 1;
 
 

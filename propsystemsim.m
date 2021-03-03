@@ -1,4 +1,4 @@
-function [DV1, DV2, DV1_MAX, DT1, DT2, V, R2, m_break,m_test] = propsystemsim(m_total,mass_payload, power_payload, prop_scheme, R1, R_max,m_break,numR2,numMass);
+function [DV1, DV2, DT, V, R2, m_break, m_array] = propsystemsim(m_total, mass_payload, power_payload, preposition_DV, prop_scheme, R1, SMAP, R_max,m_break,numR2,numMass)
 % This function calculates an array of potential propulsion system concepts
 % and returns their associated propulsive behaviors
 %
@@ -43,15 +43,18 @@ m_break = linspace(m_break(1),m_break(2),numMass);
 m2 =  m_total;
 DV1 = zeros(numR2,numMass);
 DV2 = zeros(numR2,numMass);
-DV1_MAX = zeros(numR2,numMass);
-DT1 = zeros(numR2,numMass);
-DT2 = zeros(numR2,numMass);
+DT = zeros(numR2,numMass);
+m_array = zeros(9,numR2,numMass);
 V = zeros(numR2,numMass);
+
+V0 = sum(SMAP(:,7));
 % Determine solar panels required for EP 
-EP_power = prop_scheme(2,4);
+EP_power = prop_scheme(1,4);
 [~, EP_SP_mass, EP_SP_area,V_EP_panels] = panel_power(R1,[],EP_power);
 % figure
 % hold on
+
+
 
 for ii = 1:numR2
     % Determine mass of solar panels and payload
@@ -75,53 +78,31 @@ for ii = 1:numR2
         if (m4 > m3) || (m3 > m2)
             error('Mass breakdown error')
         end
-        % Create system and develop performance outputs
         
         
-        % Create thrust plate funtions (propsizing3 and propsizing4 that w/ mass breakdown and DV1, DV2, rather than 
-        % Create function for outputting DV1 non-inst vs DV2 inst, dt vs DV2 inst, DV1 bonus vs DV2 inst
-        
-        % Change check function (easy)
-        % Get new results outputs (lets just pass in the mass breakdown
-        % calcs)
         [mass_array,power_area,dv1, dv2, dt,V] = ...
-    prop_sizing4(m4, m2, m_break_temp, payload_SP_area, R1, prop_scheme(2,:), prop_scheme(3,:));
-
-        [out1] = prop_capability(mass_array, prop_scheme(2,:), prop_scheme(3,:));
+            prop_sizing4(m4, m2, m_break_temp, payload_SP_area, R1, prop_scheme(1,:), prop_scheme(2,:),preposition_DV);
         
         
-        
-         [mass_array_3,~, dv2,dt2,V2] = prop_sizing2(m4, m3, payload_SP_area, R2_temp, prop_scheme(3,:));
-         [mass_array_2,~, dv1,dt1,V1] = prop_sizing2(m3, m2, payload_SP_area, R1, prop_scheme(2,:));
-        
-
-
-
-        v_total = V1 + V2 + V_payload_panels;
+        V = V0 + V + V_payload_panels;
  
-        
-         % Max arrival fuel dump case
-        m_fuel = mass_array_3(6);
-        [~,~, dv1_max,~,~] = prop_sizing2(m3-m_fuel, m2, payload_SP_area, R1, prop_scheme(2,:));
-
-        
-        %Check for any unrealistic answers (negative or imaginary)
-        if dv2 ~= norm(dv2) || dv1 ~= norm(dv1) || v_total~= norm(v_total)
-            dv2 = 0;
-            dt2 = 0;
-            dv1 = 0;
-            dt1 = 0;
-            v_total = 0;
+%         if ~isreal(mass_array) || isnan(mass_array)
+%             error('Unreal mass array')
+        if ~isreal(power_area) || isnan(power_area)
+            error('Unreal power area')
+        elseif ~isreal(dv1) || isnan(dv1)
+            error('Unreal DV1')
+        elseif ~isreal(dv2) || isnan(dv2)
+            error('Unreal DV2')
+        elseif ~isreal(dt) || isnan(dt)
+            error('Unreal burn time')
         end
-            
         
         DV1(ii,jj) = dv1;
         DV2(ii,jj) = dv2;
-        DV1_MAX(ii,jj) = dv1_max;
-        DT1(ii,jj) = dt1;
-        DT2(ii,jj) = dt2; 
-        V(ii,jj) = v_total;
-        m_test(ii,jj,:) = [m2,m3];
+        DT(ii,jj) = dt;
+        V(ii,jj) = V;
+        m_array(:,ii,jj) = [mass_array];
         
     end
 end
