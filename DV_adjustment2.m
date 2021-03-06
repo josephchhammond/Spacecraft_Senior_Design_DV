@@ -20,6 +20,9 @@ function [dtburn_dt,DV_factor_adj] = DV_adjustment2(DV_factor,p,dtburn_dt_max)
 % or
 % a*dtburn_dt^2 + b*dtburn_dt + c - DV_factor^2 = 0
 
+
+
+
 % Find quadratic solutions of dtburn_dt for a given DV_factor
 a = p(1);
 b = p(2);
@@ -33,10 +36,16 @@ dtburn_dt = x1.*check_x1 + x2.*check_x2; %Burn fraction for an associated DV_fac
 
 % For any burns that can take longer than limit (arent limited by DV2), set
 % any values above dtburn_dt_max to dtburn_dt_max 
-check2 = dtburn_dt_max*ones(size(DV_factor));
-excess_check = dtburn_dt > check2;
+excess_check = dtburn_dt > dtburn_dt_max;
 dtburn_dt = dtburn_dt - excess_check.*dtburn_dt + dtburn_dt_max.*excess_check;
+
+
 
 % Adjust DV_factor based on any new dtburn_dt
 DV_factor_adj = (polyval(p,dtburn_dt)).^.5;
+
+
+
+
+
 end

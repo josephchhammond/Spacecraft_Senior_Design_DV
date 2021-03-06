@@ -191,15 +191,16 @@ function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,D
         % Good systems can arrive under some amount of non-instantaenty and should have dtburn_dt 0-.5
         % Great systems are have extra fuel they dump to meet only the max burn time of dtburn_dt .5 
         
+        
+        % Set max burn time at the lower value of:
+        %   a) Defined amount of 50% of transfer
+        %   b) Max burn time from a departure sys
+        dt_burn_max = m_burned1*g*Isp1/F1;
+        dtburn_dt_max = dt_burn_max/dt_transfer;
 
-    % Set max burn time at the lower value of:
-    %   a) Defined amount of 50% of transfer
-    %   b) Max burn time from a departure system
-    dt_burn_max = m_prop1*g*Isp1/F1;
-    dtburn_dt_max_capable = dt_burn_max./dtdata_;
-    check = dtburn_dt_max_capable < dtburn_dt_max;
-    dtburn_dt_max = dtburn_dt_max + (dtburn_dt_max_capable - dtburn_dt_max) .* check;
-    
+
+
+
     [dtburn_dt,DV2_factor_adj] = DV_adjustment2(DV2_factor,p2_adjust,dtburn_dt_max); 
     DV2_req = DV2_factor_adj.*DV2adj_; %Arrival DV specific to this transfer
     dtburn = dtdata_.*dtburn_dt;

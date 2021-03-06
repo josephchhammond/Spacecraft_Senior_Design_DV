@@ -34,14 +34,9 @@
 
 
 
-% Limit volume by tank only? Max is 10 m^3?? Get rid of analysis as a check
-% Change smap to match mission concept
-% Check power mass
-% Hardcode in radiator and sp mass
+% Limit volume by tank only? Max is 10 m^3??
 
-% Check line by line
-% Check matrix math
-% Check everything in output window (especially preposition chem mass
+
 %% Inputs
 
 
@@ -94,8 +89,8 @@ SMAP = [SMAP_payload;SMAP_departure;SMAP_preposition];
 
 
 
-R_max = [3, 5]; %Range of heliocentric rendevous design pts, AU (User input)
-m_break = [.05,.6]; %Range of mass breakdown (propmass of departure stage/propmass of arrival and departure stages) (User input)
+R_max = [3, 7]; %Range of heliocentric rendevous design pts, AU (User input)
+m_break = [.05,.4]; %Range of mass breakdown (propmass of departure stage/propmass of arrival and departure stages) (User input)
 numR2 = 3; % Simulation size (User input)
 numMass = 3; % Simulation size (User input)
 
