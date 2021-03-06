@@ -44,41 +44,34 @@ m2 =  m_total;
 DV1 = zeros(numR2,numMass);
 DV2 = zeros(numR2,numMass);
 DT = zeros(numR2,numMass);
-m_array = zeros(10,numR2,numMass);
+m_array = zeros(9,numR2,numMass);
 V = zeros(numR2,numMass);
-m_stage = SMAP(2,1);
-
 
 % Determine solar panels required for EP 
 EP_power = prop_scheme(1,4);
-departure_power = EP_power + SMAP(2,2);
-[~, EP_SP_mass, ~,~] = panel_power(R1,[],departure_power);
-departure_power = sum(SMAP(:,3)) / R1^2; % Onboard solar panels for departure and on payload
-if EP_power>departure_power
-    disp("Departure power draw exceeds solar panels");
-    pause;
-end
+[~, EP_SP_mass, ~,~] = panel_power(R1,[],EP_power);
+
+% Determine onboard solar panels for departure and on payload
+departure_power = sum(SMAP(:,2)) / R1^2;
+
+
 
 % Determine radiators and heat loads present
 departure_radiators = sum(SMAP(:,4));
-departure_heat = SMAP(2,5) + prop_scheme(1,9);
-if departure_heat>departure_radiators
-    disp("Departure heat loads exceed radiators onboard, and current functionality doesn't automatically add radiators");
-    pause;
-end
+departure_heat = sum(SMAP(:,4));
+
 
 
 for ii = 1:numR2
-    % Determine mass of solar panels on payload
+    % Determine mass of solar panels and payload
     R2_temp = R2(ii);
     [~,payload_SP_mass,payload_SP_area,V_payload_panels] = panel_power(R2_temp, [], power_payload);
+    m4 = payload_SP_mass+mass_payload;
     
     %Determine variable mass in system
-    if payload_SP_mass < EP_SP_mass
-        m4 = mass_payload;
+    if payload_SP_mass > EP_SP_mass
         m_available = m2 - m4;
     else
-        m4 = payload_SP_mass+mass_payload;
         m_available = m2 - mass_payload - EP_SP_mass;
         disp('Warning - Additional Solar Panels Required in System')
         pause;
@@ -95,10 +88,12 @@ for ii = 1:numR2
         end
         
         
-        [mass_array,power_area,dv1, dv2, dt,v] = ...
-            prop_sizing4(m4, m2, m_stage, m_break_temp, departure_power, R1, prop_scheme(1,:), prop_scheme(2,:),preposition_DV);
+        [mass_array,power_area,dv1, dv2, dt,V] = ...
+            prop_sizing4(m4, m2, m_break_temp, payload_SP_area, R1, prop_scheme(1,:), prop_scheme(2,:),preposition_DV);
         
-         
+        
+        V = V;
+ 
 %         if ~isreal(mass_array) || isnan(mass_array)
 %             error('Unreal mass array')
         if ~isreal(power_area) || isnan(power_area)
@@ -114,7 +109,7 @@ for ii = 1:numR2
         DV1(ii,jj) = dv1;
         DV2(ii,jj) = dv2;
         DT(ii,jj) = dt;
-        V(ii,jj) = v;
+        V(ii,jj) = V;
         m_array(:,ii,jj) = [mass_array];
         
     end

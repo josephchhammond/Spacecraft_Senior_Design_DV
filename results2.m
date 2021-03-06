@@ -29,7 +29,7 @@ fprintf('Earth Hyberbolic Excess: %.2f m/s\n', preposition_DV1);
 fprintf('Preposition DV: %.2f m/s\n', preposition_DV2);
 fprintf('Departure DV: %.2f m/s\n', dv1);
 fprintf('Arrival DV: %.2f m/s\n', dv2);
-fprintf('Total Volume: %.2f m^3\n', v_total);
+fprintf('Total Tank Volume: %.2f m^3\n', v_total);
 disp('~~~~~');
 
 
@@ -40,6 +40,7 @@ disp(' ');
 fprintf('Preposition Chem Mass: %.2f kg\n', mass_sys(9));
 fprintf('Departure Eprop Mass: %.2f kg\n', mass_sys(2));
 fprintf('Arrival Chem Mass: %.2f kg\n', mass_sys(3) - mass_sys(9));
+fprintf('Mass Staged After Departure Burn: %.2f kg\n', mass_sys(10));
 disp(' ');
 fprintf('EProp Tank Mass: %.2f kg\n', mass_sys(4));
 fprintf('Chem Prop Tank Mass: %.2f kg\n', mass_sys(5));
@@ -47,7 +48,7 @@ fprintf('Additional Power Mass (external to payload): %.2f kg\n', mass_sys(6));
 fprintf('Thrust Plate Mass : %.2f kg\n', mass_sys(7) - mass_sys(6) - mass_sys(5) - mass_sys(4));
 fprintf('Total Prop Dry Mass: %.2f kg\n', mass_sys(7));
 disp(' ');
-fprintf('Total mass: %.2f kg\n', mass_sys(8));
+fprintf('Total Mass: %.2f kg\n', mass_sys(8));
 disp('~~~~~');
 
 

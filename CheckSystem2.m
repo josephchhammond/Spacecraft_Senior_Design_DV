@@ -1,4 +1,4 @@
-function [Success] = CheckSystem2(OrbitName,PosNum,Vsys,DV1sys,DV2sys,tburn,mass_sys,R2sys,p1_adjust,p2_adjust,p_flyby,MainData,prop_scheme)
+function [Success] = CheckSystem2(OrbitName,PosNum,Vsys,DV1sys,DV2sys,preposition_DV,tburn,mass_sys,R2sys,p1_adjust,p2_adjust,p_flyby,MainData,prop_scheme)
 %Takes the info about which orbits data to check along with prop system values and
 %computes a percent success by calling the other functions defined below.
 %
@@ -41,13 +41,13 @@ function [Success] = CheckSystem2(OrbitName,PosNum,Vsys,DV1sys,DV2sys,tburn,mass
     Isp1 = prop_scheme(1,3); %Departure: F=thrust [N], Isp=specific impulse [s]
     Isp2 = prop_scheme(2,3); %Arrival: Isp=specific impulse [s]
     
-    Isp_dump1 = 300; %s ASSUMPTION
+    Isp_dump1 = Isp1; %s ASSUMPTION
     Isp_dump2 = 300; %s ASSUMPTION
-    
-    m_inert = mass_sys(8) - mass_sys(2) - mass_sys(3);
+
+    m_stage = mass_sys(10);
+    m_inert = mass_sys(8) - mass_sys(2) - mass_sys(3) - m_stage;
     m_prop1 = mass_sys(2);
     m_prop2 = mass_sys(3) - mass_sys(9);
-
     dtburn_dt_max = 0.5; % *ASSUMPTION ALERT*
 
 
@@ -70,7 +70,7 @@ for jj = a:b %for each orbit position
     ISOsuccess = zeros(n,1); %initalize the ISOsuccess vector as all zeros
     for ii = 1:n %for each ISO
         [DV1data,DV2data,dtdata,R2data] = readISOdata(OrbitData,ii); %pulls the data for the ii ISO
-        [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,DV2sys,tburn,R2sys,p1_adjust,p2_adjust,p_flyby,F1,Isp1,Isp2,Isp_dump1,Isp_dump2,m_inert,m_prop1,m_prop2,dtburn_dt_max); %checks the ISO data agianst system data
+        [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,DV2sys,preposition_DV,tburn,R2sys,p1_adjust,p2_adjust,p_flyby,F1,Isp1,Isp2,Isp_dump1,Isp_dump2,m_inert,m_prop1,m_prop2,dtburn_dt_max,m_stage); %checks the ISO data agianst system data
         num_good_transfers = sum(pass_fail,'all');
         if num_good_transfers > 0 %if any transfer to the ISO succeeded, mark that ISO as a success
             ISOsuccess(ii) = 1;
@@ -119,7 +119,7 @@ function [DV1data,DV2data,dtdata,R2data] = readISOdata(OrbitData,ISOnum)
     R2data  = OrbitData.R2{ISOnum,1};
 end
 
-function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,DV2sys,tburn,R2sys,p1_adjust,p2_adjust,p_flyby,F1,Isp1,Isp2,Isp_dump1,Isp_dump2,m_inert,m_prop1,m_prop2,dtburn_dt_max)
+function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,DV2sys,preposition_DV,tburn,R2sys,p1_adjust,p2_adjust,p_flyby,F1,Isp1,Isp2,Isp_dump1,Isp_dump2,m_inert,m_prop1,m_prop2,dtburn_dt_max,m_stage)
 % Converts the provided orbits data to a pass fail metric based on the system parameters
 % Calculation works backwards in burns to evaluate feasibility. General
 % steps of model are as follows:
@@ -215,7 +215,7 @@ function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,D
     m_burned1 = dtburn.*F1./(g*Isp1);
     m_dump1 = m_prop1 - m_burned1;
     % Find how much departure DV we get, adjusted for non-instantaety
-    f_1 = (m_inert + m_burned2)./(m_inert + m_burned1 + m_burned2); %%%
+    f_1 = (m_inert + m_stage+ m_burned2)./(m_inert + m_stage + m_burned1 + m_burned2); %%%
     DV1_noninst = -Isp1.*g.*log(f_1);
     DV1_factor = DV_adjustment(1,p1_adjust,dtburn_dt,1);
     DV1_noninst_adj = DV1_noninst ./ DV1_factor;
@@ -223,9 +223,9 @@ function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,D
 % DV2 dump (second burn)
     % Find how much DV we get out of dumping extra arrival fuel before
     % departure
-    m_post_dump2 = m_inert + m_burned1 + m_burned2;
+    m_post_dump2 = m_inert + m_burned1 + m_burned2 + m_stage;
     m_pre_dump2 = m_post_dump2 + m_dump2;
-    f_dump2 = m_post_dump2./m_pre_dump2; %%%
+    f_dump2 = m_post_dump2./m_pre_dump2;
     DV_dump2 = -Isp_dump2*g.*log(f_dump2);
     
 % DV1 dump (first burn)
@@ -237,7 +237,7 @@ function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,D
     DV_dump1 = -Isp_dump1.*g.*log(f_dump1);
     
 % Tally total departure DV output
-    DV1_total = (DV_dump1 + DV_dump2 + DV1_noninst_adj)/1000; %km/s
+    DV1_total = (DV_dump1 + DV_dump2 + DV1_noninst_adj - preposition_DV)/1000; %km/s
     
     
     %Criteria to meet

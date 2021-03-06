@@ -27,7 +27,7 @@ function [dtburn_dt,DV_factor_adj] = DV_adjustment2(DV_factor,p,dtburn_dt_max)
 a = p(2);
 b = p(3);
 c = p(4) - DV_factor^2;
-[x1,x2] = quad(a,b,c);
+[x1,~] = quad(a,b,c);
     % % Find positive solution of this set
     % check1 = zeros(size(DV_factor));
     % check_x1 = x1 > check1;

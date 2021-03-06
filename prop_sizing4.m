@@ -1,5 +1,5 @@
-function [mass_array,power_area,dv1, dv2, dt,V] = ...
-    prop_sizing4(payload_mass, m0, m_break, power_area, R, prop_system1, prop_system2,preposition_DV)
+function [mass_array,nominal_power,dv1, dv2, dt,V] = ...
+    prop_sizing4(payload_mass, m0, m_stage, m_break, nominal_power, R, prop_system1, prop_system2,preposition_DV)
 % This function calculates performance for a given departure and arrival
 % system on a thrust plate.
 %
@@ -12,8 +12,9 @@ function [mass_array,power_area,dv1, dv2, dt,V] = ...
 % Inputs:
 % payload_mass[1]: Mass of payload, [kg]
 % m0[1]: Total initial mass of stage, [kg]
+% m_stage[1]: Mass dumped after departure burn, [kg]
 % m_break[1]: Breakdown of propellant mass (fraction on departure system) []
-% power_area[1]: Total area of solar array on payload, [m2]
+% nominal_power[1]: Total power on payload at 1AU, [m2]
 % R[1]: Distance from sun, [AU]
 % m0[1]: Initial mass of spacecraft, [kg]
 % prop_system1[1,8]: Departure eprop propulsion system characteristics:
@@ -26,6 +27,7 @@ function [mass_array,power_area,dv1, dv2, dt,V] = ...
 %                   6 - Mixing Ratio (O/F)
 %                   7 - Oxidizer Density (kg/m^3)
 %                   8 - Fuel Density (kg/m^3)
+%                   9 - Waste Heat from power conversion and thruster heating [W]
 % preposition_DV [1]: Arrival burn DV allocated to prepositioning
 %
 % Outputs:
@@ -39,6 +41,7 @@ function [mass_array,power_area,dv1, dv2, dt,V] = ...
 %                   7 - Dry mass, [kg]
 %                   8 - Total stage mass, [kg] 
 %                   9 - Chemprop Propellant mass allocated to prepositioning, [kg]
+%                   10 - Mass staged after departure burn, [kg]
 
 
 % power_area[1]: Total area of solar array required, [m2]
@@ -48,7 +51,6 @@ function [mass_array,power_area,dv1, dv2, dt,V] = ...
 % V[1]: Volume of system, [m^3]
 %
 % Written by: Joseph Hammond
-
 g0 = 9.81;      % Gravitational acceleration, [m/s2]
 
 %% Input validation to confirm instantaneous-compatible prop system
@@ -86,26 +88,30 @@ else
     error('Departure burn must be Chem-prop')
 end
 
+%% Solar and Radiator Panel Checks
+
+P_prop = prop_system1(4) + prop_system2(4);
+
+if P_prop >= nominal_power
+    disp('Warning - Additional Solar panels required to meet propulsion requirements')
+    pause;
+    [~,power_mass1,~,~] = panel_power(1, [], nominal_power);                         % Power mass on vehicle [kg]
+    [~,power_mass2,~,~] = panel_power(R, [], P_prop);        % Power mass required at stage [kg]
+    mass_panels =  power_mass2 - power_mass1;
+    nominal_power = P_prop;
+else
+    mass_panels = 0;
+end
+
+
 
 %% Mass assignments
 mass_array(1) = payload_mass;                           % Payload Mass [kg]
 mass_array(8) = m0;                                     % Initial mass [kg]
-
-P_prop = prop_system1(4) + prop_system2(4);
-[~,power_mass1,~,V_panels1] = panel_power(R, power_area);                         % Power mass on vehicle [kg]
-[~,power_mass2,power_area2,V_panels2] = panel_power(R, [], P_prop);        % Power mass required at stage [kg]
-if power_mass2 >= power_mass1
-    mass_panels =  power_mass2 - power_mass1;
-    power_area = power_area2;
-    V_panels = V_panels2-V_panels1;
-else
-    mass_panels = 0;
-    V_panels = 0;
-end
 mass_array(6) = mass_panels;
 
 thruster_mass = prop_system1(2) + prop_system2(2); % Mass of both thrusters/thruster plate [kg]
-m_available = m0 - payload_mass - mass_panels - thruster_mass; % Propellant and tank mass available for both burns [kg]
+m_available = m0 - payload_mass - mass_panels - thruster_mass - m_stage; % Propellant and tank mass available for both burns [kg]
 
 m_available1 = m_available * m_break; % Propellant and tank mass of departure burn [kg]
 m_available2 = m_available - m_available1; % Propellant and tank mass of arrival burn [kg]
@@ -126,7 +132,9 @@ mass_array(7) = m_dry;
 Isp2 = prop_system2(3); %Specific impulse of departure [s]
 f_preposition = exp(-preposition_DV/(Isp2*g0)); % Inert mass fraction of prepositon, [m/s]
 m_prop0 = m0*(1-f_preposition);
+m_prop2 = m_prop2-m_prop0;
 mass_array(9) = m_prop0;
+mass_array(10) = m_stage;
 
 %% Maneuvers
 g0 = 9.81;      % Gravitational acceleration, [m/s2]
@@ -139,7 +147,7 @@ dv1 = -Isp1*g0*log(f_inert1);
 dt = g0*Isp1*m_prop1/T1;
 
 %Arrival Burn
-f_inert2 = (m0 - m_prop0 - m_prop1 - m_prop2)/(m0 - m_prop0 - m_prop1); % Inert mass fraction of arrival, [m/s2]
+f_inert2 = (m0 - m_prop0 - m_prop1 - m_prop2 - m_stage)/(m0 - m_prop0 - m_prop1 - m_stage); % Inert mass fraction of arrival, [m/s2]
 dv2 = -Isp2*g0*log(f_inert2);
 
 %% Volume Assignments
@@ -155,7 +163,6 @@ m_F = m_prop1/(O_F+1); % Fuel mass (kg)
 
 V_O = m_O/rho_O; % Oxidizer volume (m^3)
 V_F = m_F/rho_F; % Fuel volume (m^3)
-V_sys = prop_system1(5);
 V_prop1 = V_O+V_F;
 
 
@@ -170,11 +177,10 @@ m_F = m_prop2/(O_F+1); % Fuel mass (kg)
 
 V_O = m_O/rho_O; % Oxidizer volume (m^3)
 V_F = m_F/rho_F; % Fuel volume (m^3)
-V_sys = prop_system2(5);
 V_prop2 = V_O+V_F;
 
 
-V = V_panels + V_prop1 + V_prop2 + V_sys;
+V = V_prop1 + V_prop2;
 
 if ~isreal(V) || isnan(V) || V~=norm(V)
     error('Unreal volume of stage')
