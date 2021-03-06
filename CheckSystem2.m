@@ -27,8 +27,8 @@ function [Success] = CheckSystem2(OrbitName,PosNum,Vsys,DV1sys,DV2sys,tburn,mass
     %unit adjustments
     AU = 1.496e8; %AU to km
     R2sys = R2sys*AU; % adjust to AU
-    DV1sys = DV1sys/1000; %convert to km/s
-    DV2sys = DV2sys/1000; %convert to km/s
+    DV1sys = DV1sys; %convert to km/s
+    DV2sys = DV2sys; %convert to km/s
     Success = []; %create empty variable
     
     
@@ -183,7 +183,7 @@ function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,D
     DV2adj_ = max(DV2data - maxflyby,0.001);
     
     % Find how many times we can cover the arrival requirements
-    DV2_factor = DV2sys./DV2adj_;
+    DV2_factor = DV2sys./DV2adj_/1000;
     
     % Find how much burntime we can allow for this system and actual DV
     % requirements for our arrival stage
@@ -237,7 +237,7 @@ function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,D
     DV_dump1 = -Isp_dump1.*g.*log(f_dump1);
     
 % Tally total departure DV output
-    DV1_total = DV_dump1 + DV_dump2 + DV1_noninst_adj;
+    DV1_total = (DV_dump1 + DV_dump2 + DV1_noninst_adj)/1000; %km/s
     
     
     %Criteria to meet
