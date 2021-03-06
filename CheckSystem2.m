@@ -180,7 +180,7 @@ function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,D
 % DV2 (fourth burn) 
     % Reduce arrival requirements based on flyby velocity
     maxflyby = polyval(p_flyby,R2data);
-    DV2adj_ = max(DV2data - maxflyby,0);
+    DV2adj_ = max(DV2data - maxflyby,0.001);
     
     % Find how many times we can cover the arrival requirements
     DV2_factor = DV2sys./DV2adj_;
