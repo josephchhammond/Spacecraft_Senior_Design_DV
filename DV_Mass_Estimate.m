@@ -55,6 +55,7 @@
     % course corrections (DV2)
     % variation in flyby velocity
     % limit to 11000kg
+    % 2D VARIATION +- with R3-7? and all mbreak -> big boy!!
     
     % 1 XR100 vs 2XR 100 (vs 1.5, 2.5, 3)
     % margins on chem and eprop saving
