@@ -41,6 +41,8 @@
 % power dissipation, everything is BOL
 
 
+% 2800 at 100kW?
+% 3500 s isp for krypton
 
 
 % Sensitivity studies
@@ -98,10 +100,10 @@ SMAP = [SMAP_payload;SMAP_departure];
 
 
 
-R_max = [5, 5]; %Range of heliocentric rendevous design pts, AU (User input)
-m_break = [.2,.7]; %Range of mass breakdown (propmass of departure stage/propmass of arrival and departure stages) (User input)
-numR2 = 2; % Simulation size (User input)
-numMass = 2; % Simulation size (User input)
+R_max = [3, 7]; %Range of heliocentric rendevous design pts, AU (User input)
+m_break = [.2,.8]; %Range of mass breakdown (propmass of departure stage/propmass of arrival and departure stages) (User input)
+numR2 = 5; % Simulation size (User input)
+numMass = 50; % Simulation size (User input)
 
 % prop = [8];
 %                   1 - 0 for chemprop (and impulsive) || Thrust for eprop (and non-impulsive), [N]
