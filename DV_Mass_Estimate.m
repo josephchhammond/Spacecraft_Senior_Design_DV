@@ -32,9 +32,6 @@
 
 
 % Consider coms power draw (distance traveled and what power draw is)
-
-% Annotate everything
-% Check line by line prop system
 % Check everything in output window (especially preposition chem mass
 
 
@@ -46,7 +43,6 @@
 
 
 
-% Annotate
 % Sensitivity studies
     % variations in mass (mass to ISO)
     % variations in mass (jetisoned mass)
@@ -61,13 +57,6 @@
     % margins on chem and eprop saving
     % Fuel dumpt ISP (eprop)
     % different thrusters
-
-
-
-
-
-
-
 %% Inputs
 
 
