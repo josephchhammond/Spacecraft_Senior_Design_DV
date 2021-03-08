@@ -92,7 +92,7 @@ end
 
 P_prop = prop_system1(4) + prop_system2(4);
 
-if P_prop >= nominal_power
+if P_prop > nominal_power
     disp('Warning - Additional Solar panels required to meet propulsion requirements')
     pause;
     [~,power_mass1,~,~] = panel_power(1, [], nominal_power);                         % Power mass on vehicle [kg]

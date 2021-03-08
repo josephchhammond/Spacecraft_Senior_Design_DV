@@ -54,8 +54,11 @@
     % preposition cost (DV1)
     % course corrections (DV2)
     % variation in flyby velocity
+    
     % 1 XR100 vs 2XR 100 (vs 1.5, 2.5, 3)
     % margins on chem and eprop saving
+    % Fuel dumpt ISP (eprop)
+    % different thrusters
 
 
 
@@ -106,8 +109,8 @@ SMAP = [SMAP_payload;SMAP_departure];
 
 R_max = [5, 5]; %Range of heliocentric rendevous design pts, AU (User input)
 m_break = [.2,.7]; %Range of mass breakdown (propmass of departure stage/propmass of arrival and departure stages) (User input)
-numR2 = 3; % Simulation size (User input)
-numMass = 3; % Simulation size (User input)
+numR2 = 1; % Simulation size (User input)
+numMass = 10; % Simulation size (User input)
 
 % prop = [8];
 %                   1 - 0 for chemprop (and impulsive) || Thrust for eprop (and non-impulsive), [N]
@@ -119,38 +122,44 @@ numMass = 3; % Simulation size (User input)
 %                   7 - Oxidizer Density [kg/m^3]
 %                   8 - Fuel Density (inf for eprop)[kg/m^3]
 %                   9 - Waste Heat from power conversion (.225/.775 times Power required) and thruster heating (function of thruster) [W]
+%                   10 - Fuel dump Isp, [s]
 
-XR100 =   [5,  250, 5000, 100000,0,inf,1000,inf,(100000*.225/.775 + 20000)]; % XR-100 systems (GUESS IS 1000kg/m^3!!)
-XR100_2 = [10, 500, 5000, 200000,0,inf,1000,inf,(200000*.225/.775 + 40000)]; %2 XR-100 systems (GUESS IS 1000kg/m^3!!)
+XR100 =   [5,  250, 5000, 100000,0,inf,1000,inf,(100000*.225/.775 + 20000),300]; % XR-100 systems (GUESS IS 1000kg/m^3!!)
+XR100_2 = [10, 500, 5000, 200000,0,inf,1000,inf,(200000*.225/.775 + 40000),300]; %2 XR-100 systems (GUESS IS 1000kg/m^3!!)
 % R4D = [0, 3.63, 312, 46]; % 1 R4D system
-R4D_4 = [0, 25, 312, 0, 0, 1.65, 1440, 880,0]; % 1 R4D system
+R4D_4 = [0, 25, 312, 0, 0, 1.65, 1440, 880,0,312]; % 1 R4D system
 
 
 % prop_scheme = [departure_DV; arrival_DV]
 prop_scheme = [XR100_2;R4D_4];
-
+eprop_dump_ISP = 1000;
 
 
 %% Current Assumptions (function assumptions not included)
 
 % ----- Preposition -----
 % Flight vehicle is Falcon Heavy Expendable
-% Flight vehicle uses preposition_DV1
+% Prepositioning after launch vehicle uses Arrival Stage
 % Mission only viable at end of preposition process
 % Max out launch vehicle mass
 % No power draw
 
 % -----  Departure  -----
+% Electrical system
 % Solar panel at BOL throughout analysis
 % Solar panels unnafected by transfer (AU >= .8)
 % Solar panels sized to apogee
-% 1 burn
+% Additional fuel not required in arrivalis burned before departure
+% If a burntime constraint exists, additional departure fuel is dumped before departure
+% Radiators, solar panels, and other masses may be jetisoned after departure
 
 % -----   Arrival   -----
+% Chemical system
 % 1 burn
-% No power draw
+% No additional power draw or radiator requirements
 
 % -----    Misc     -----
+% All propulsion on a thrust plate
 % Standard units: km, yr
 % No trajectory adjustment or orbital maintanence burns
 % No gravity assists
@@ -160,6 +169,7 @@ prop_scheme = [XR100_2;R4D_4];
 % 5% of electrical fuel is saved as margin
 % 2% of chemical fuel is saved as margin
 
+
 %% Create Propulsion Systems
 
 % PLACEHOLDER - Find factors of amplification on non-instantaneous lambert solution
@@ -168,17 +178,10 @@ prop_scheme = [XR100_2;R4D_4];
 % Find mass in launch vehicle
 [m1,~] = launchvehicle(preposition_DV1);
 
-% Find mass in preopositioned orbit
-preposition_system = prop_scheme(1,:);
-R1 = orbit(1);
-
-% [mass_array2,P_nom, ~, V2] = prop_sizing_preposition(m1*LV_mass_capacity, R1, preposition_DV2, preposition_system,SMAP);
-% m2 = mass_array2(1);
-
-
 % Simulate a variety of proposed systems
-[DV1, DV2, DT, V, R2, m_break, m_array] = propsystemsim(m1, mass_payload, power_payload, preposition_DV2, prop_scheme, R1, SMAP, R_max,m_break,numR2,numMass);
+[DV1, DV2, DT, V, R2, m_break, m_array] = propsystemsim(m1, preposition_DV2, prop_scheme, max(orbit), SMAP, R_max,m_break,numR2,numMass);
 V_total = V/V_max;
+
 disp('Propulsion systems generated!')
 disp(' ')
 %% Evaluate Prop System Success Rate

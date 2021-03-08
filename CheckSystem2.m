@@ -40,8 +40,8 @@ function [Success] = CheckSystem2(OrbitName,PosNum,Vsys,DV1sys,DV2sys,prepositio
     Isp1 = prop_scheme(1,3); %Departure: F=thrust [N], Isp=specific impulse [s]
     Isp2 = prop_scheme(2,3); %Arrival: Isp=specific impulse [s]
     
-    Isp_dump1 = 300; %s ASSUMPTION
-    Isp_dump2 = Isp2; %s ASSUMPTION
+    Isp_dump1 = prop_scheme(1,10);
+    Isp_dump2 = prop_scheme(2,10);
 
     m_stage = mass_sys(10);
     m_prop1 = mass_sys(2)*(1-e_margin);
