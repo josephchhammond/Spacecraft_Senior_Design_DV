@@ -54,6 +54,7 @@
     % preposition cost (DV1)
     % course corrections (DV2)
     % variation in flyby velocity
+    % limit to 11000kg
     
     % 1 XR100 vs 2XR 100 (vs 1.5, 2.5, 3)
     % margins on chem and eprop saving
@@ -109,8 +110,8 @@ SMAP = [SMAP_payload;SMAP_departure];
 
 R_max = [5, 5]; %Range of heliocentric rendevous design pts, AU (User input)
 m_break = [.2,.7]; %Range of mass breakdown (propmass of departure stage/propmass of arrival and departure stages) (User input)
-numR2 = 1; % Simulation size (User input)
-numMass = 10; % Simulation size (User input)
+numR2 = 2; % Simulation size (User input)
+numMass = 2; % Simulation size (User input)
 
 % prop = [8];
 %                   1 - 0 for chemprop (and impulsive) || Thrust for eprop (and non-impulsive), [N]
@@ -132,7 +133,7 @@ R4D_4 = [0, 25, 312, 0, 0, 1.65, 1440, 880,0,312]; % 1 R4D system
 
 % prop_scheme = [departure_DV; arrival_DV]
 prop_scheme = [XR100_2;R4D_4];
-eprop_dump_ISP = 1000;
+eprop_dump_ISP = 100;
 
 
 %% Current Assumptions (function assumptions not included)
@@ -171,6 +172,7 @@ eprop_dump_ISP = 1000;
 
 
 %% Create Propulsion Systems
+disp('Generating Propulsion systems...')
 
 % PLACEHOLDER - Find factors of amplification on non-instantaneous lambert solution
 [p1,p2] = NonInstantaneousLambert(orbitname);
@@ -203,9 +205,12 @@ PercentCoverage = zeros(numR2,numMass); %preallocate coverage matrix
 
 
 % tic 
-
+n = 0;
+n_total = size(DV1,1)*size(DV1,2);
+disp('Checking System Coverage...')
 for ii = 1:size(DV1,1)
     for jj = 1:size(DV1,2)
+        n = n+1;
         Vsys = V_total(ii,jj);
         DV1sys = DV1(ii,jj); %pull single DV1 for system to check
         DV2sys = DV2(ii,jj); %pull single DV2 for system to check
@@ -225,9 +230,11 @@ for ii = 1:size(DV1,1)
             fprintf("%.1f s Estimated Runtime, %.2f s/system\n",t_est*(numR2*numMass),t_est) %display time taken
             tic
         end
+        
+        fprintf("%.1f%%\n",100 * n/n_total) %note progress
     end
-    fprintf("%.1f%%\n",100 * ii/size(DV1,1)) %note progress
 end
+disp('System Coverage Calculated!')
 
  t_taken = toc;
  t_taken = t_taken + t_est;
