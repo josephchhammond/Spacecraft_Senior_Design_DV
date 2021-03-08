@@ -8,6 +8,11 @@ function results2(PercentCoverage,preposition_DV1,preposition_DV2,V,DV1,DV2,m_ar
 ii = i1(i2);
 jj = i2;
 
+if size(PercentCoverage,1) == 1
+   jj = ii;
+   ii = 1;
+end
+
 % Find index ii and jj of best system
 R2_ii = R2(ii);
 dv1 = DV1(ii,jj);

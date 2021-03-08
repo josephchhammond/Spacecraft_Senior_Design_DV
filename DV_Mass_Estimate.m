@@ -46,9 +46,21 @@
 
 
 
-% Verify matrices arent negative or imaginary
 % Annotate
 % Sensitivity studies
+    % variations in mass (mass to ISO)
+    % variations in mass (jetisoned mass)
+    % launch vehicle prepositioning costs
+    % preposition cost (DV1)
+    % course corrections (DV2)
+    % variation in flyby velocity
+    % 1 XR100 vs 2XR 100 (vs 1.5, 2.5, 3)
+    % margins on chem and eprop saving
+
+
+
+
+
 
 
 %% Inputs
@@ -145,13 +157,15 @@ prop_scheme = [XR100_2;R4D_4];
 % Non-instantaneous burns modeled as instantaneous calculated under a safety factor
 % Electrical system loss of .775
 % Solar panels specific power at 1AU is 120 W/kg
-
+% 5% of electrical fuel is saved as margin
+% 2% of chemical fuel is saved as margin
 
 %% Create Propulsion Systems
 
-% Find mass in launch vehicle
+% PLACEHOLDER - Find factors of amplification on non-instantaneous lambert solution
 [p1,p2] = NonInstantaneousLambert(orbitname);
 
+% Find mass in launch vehicle
 [m1,~] = launchvehicle(preposition_DV1);
 
 % Find mass in preopositioned orbit

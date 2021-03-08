@@ -31,12 +31,11 @@ function [Success] = CheckSystem2(OrbitName,PosNum,Vsys,DV1sys,DV2sys,prepositio
     DV2sys = DV2sys; %convert to km/s
     Success = []; %create empty variable
     
-    
+    chem_margin = .02;
+    e_margin = .05;
     
 
-    
-    
-    
+        
     F1 = prop_scheme(1,1); %Departure: F=thrust [N], Isp=specific impulse [s]
     Isp1 = prop_scheme(1,3); %Departure: F=thrust [N], Isp=specific impulse [s]
     Isp2 = prop_scheme(2,3); %Arrival: Isp=specific impulse [s]
@@ -45,9 +44,10 @@ function [Success] = CheckSystem2(OrbitName,PosNum,Vsys,DV1sys,DV2sys,prepositio
     Isp_dump2 = Isp2; %s ASSUMPTION
 
     m_stage = mass_sys(10);
-    m_inert = mass_sys(8) - mass_sys(2) - mass_sys(3) - m_stage;
-    m_prop1 = mass_sys(2);
-    m_prop2 = mass_sys(3) - mass_sys(9);
+    m_prop1 = mass_sys(2)*(1-e_margin);
+    m_prop2 = mass_sys(3)*(1-chem_margin);
+    m_inert = mass_sys(8) - m_prop1 - m_prop2 - m_stage;
+
     dtburn_dt_max = 0.5; % *ASSUMPTION ALERT*
 
 

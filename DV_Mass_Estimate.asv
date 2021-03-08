@@ -46,9 +46,16 @@
 
 
 
-% Verify matrices arent negative or imaginary
 % Annotate
 % Sensitivity studies
+
+
+% variations in mass (mass to ISO, jetisoned mass)
+% variation in flyby velocity
+% 1 XR100 vs 2X
+
+
+
 
 
 %% Inputs
@@ -166,20 +173,19 @@ R1 = orbit(1);
 [DV1, DV2, DT, V, R2, m_break, m_array] = propsystemsim(m1, mass_payload, power_payload, preposition_DV2, prop_scheme, R1, SMAP, R_max,m_break,numR2,numMass);
 V_total = V/V_max;
 disp('Propulsion systems generated!')
-
+disp(' ')
 %% Evaluate Prop System Success Rate
 % Determine success rate of each proposed system
 maindata{2,12} = 0;
 if ~isstruct(maindata{1,12})
-    disp('Orbit Data Load Required')
+    disp('Orbit Data Load Required...')
     tic
     maindata = LoadWholeOrbit(orbitname,12); %load in data to matlab once **If iteration used, comment this line, make sure data loaded before while loop**
-    disp('Orbit Data Load Complete')
-    disp('Time Elapsed (s):')
+    disp('Orbit Data Load Complete!')
+    disp('Time to Load (s):')
     t = toc;
-    d
-
-
+    disp(num2str(t))
+    disp(' ')
 end
 PosNum = 0; %set to zero means check every orbit position
 PercentCoverage = zeros(numR2,numMass); %preallocate coverage matrix
