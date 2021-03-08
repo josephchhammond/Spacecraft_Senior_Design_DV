@@ -53,14 +53,26 @@ disp('~~~~~');
 
 
 
-
-figure
-surf(m_break,R2,PercentCoverage);
-title('For optimization use, not for external')
-xlabel('Mass Breakdown')
-ylabel('Design R2 (AU)')
-zlabel('ISO Coverage (%)')
-colorbar
-caxis([0,16]) % fixes colorbar colors to cap at 15, gives consistent coloring regardless of plot
+if size(PercentCoverage,1) == 1
+    figure
+    plot(m_break,PercentCoverage);
+    title('For optimization use, not for external')
+    xlabel('Mass Breakdown')
+    ylabel('ISO Coverage (%)')
+elseif size(PercentCoverage,2) == 1
+    figure
+    plot(R2,PercentCoverage);
+    title('For optimization use, not for external')
+    xlabel('Design R2 (AU)')
+    ylabel('ISO Coverage (%)')
+else
+    figure
+    surf(m_break,R2,PercentCoverage);
+    title('For optimization use, not for external')
+    xlabel('Mass Breakdown')
+    ylabel('Design R2 (AU)')
+    zlabel('ISO Coverage (%)')
+    colorbar
+    caxis([0,16]) % fixes colorbar colors to cap at 15, gives consistent coloring regardless of plot
 end
 

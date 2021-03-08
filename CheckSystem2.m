@@ -41,8 +41,8 @@ function [Success] = CheckSystem2(OrbitName,PosNum,Vsys,DV1sys,DV2sys,prepositio
     Isp1 = prop_scheme(1,3); %Departure: F=thrust [N], Isp=specific impulse [s]
     Isp2 = prop_scheme(2,3); %Arrival: Isp=specific impulse [s]
     
-    Isp_dump1 = Isp1; %s ASSUMPTION
-    Isp_dump2 = 300; %s ASSUMPTION
+    Isp_dump1 = 300; %s ASSUMPTION
+    Isp_dump2 = Isp2; %s ASSUMPTION
 
     m_stage = mass_sys(10);
     m_inert = mass_sys(8) - mass_sys(2) - mass_sys(3) - m_stage;
@@ -187,7 +187,7 @@ function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,D
     
     % Find how much burntime we can allow for this system and actual DV
     % requirements for our arrival stage
-        % Bad systems cant arrive under any circumstances and have unreal dtburn_dt < 0
+        % Bad systems cant arrive under any circumstances and have unreal dtburn_dt = 0
         % Good systems can arrive under some amount of non-instantaenty and should have dtburn_dt 0-.5
         % Great systems are have extra fuel they dump to meet only the max burn time of dtburn_dt .5 
         
@@ -199,8 +199,8 @@ function [pass_fail] = checktransfer(DV1data,DV2data,dtdata,R2data,Vsys,DV1sys,D
     dtburn_dt_max_capable = dt_burn_max./dtdata_;
     check = dtburn_dt_max_capable < dtburn_dt_max;
     dtburn_dt_max = dtburn_dt_max + (dtburn_dt_max_capable - dtburn_dt_max) .* check;
-    
     [dtburn_dt,DV2_factor_adj] = DV_adjustment2(DV2_factor,p2_adjust,dtburn_dt_max); 
+     
     DV2_req = DV2_factor_adj.*DV2adj_; %Arrival DV specific to this transfer
     dtburn = dtdata_.*dtburn_dt;
     % Find fuel dumped

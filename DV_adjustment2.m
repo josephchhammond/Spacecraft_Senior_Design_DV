@@ -26,18 +26,23 @@ function [dtburn_dt,DV_factor_adj] = DV_adjustment2(DV_factor,p,dtburn_dt_max)
 % Find quadratic solutions of dtburn_dt for a given DV_factor
 a = p(2);
 b = p(3);
-c = p(4) - DV_factor^2;
-[x1,~] = quad(a,b,c);
-    % % Find positive solution of this set
-    % check1 = zeros(size(DV_factor));
-    % check_x1 = x1 > check1;
-    % check_x2 = x2 > check1;
-    % dtburn_dt = x1.*check_x1 + x2.*check_x2; %Burn fraction for an associated DV_factor
-dtburn_dt = x1;
+c = p(4) - DV_factor.^2;
+[x1,x2] = quad(a,b,c);
+% Eliminate negative solutions
+check1 = zeros(size(DV_factor));
+check_x1 = x1 > check1;
+check_x2 = x2 > check1;
+x1_mod = x1.*check_x1;
+x2_mod = x2.*check_x2;
+check_x1_mod = x1_mod >= x2_mod;
+check_x2_mod = x1_mod < x2_mod;
+
+dtburn_dt = x1_mod.*check_x1_mod + check_x2_mod.*x2_mod; %Burn fraction for an associated DV_factor
         
 % For any burns that can take longer than limit (arent limited by DV2), set
 % any values above dtburn_dt_max to dtburn_dt_max 
 excess_check = dtburn_dt > dtburn_dt_max;
+
 dtburn_dt = dtburn_dt - excess_check.*dtburn_dt + dtburn_dt_max.*excess_check;
 
 

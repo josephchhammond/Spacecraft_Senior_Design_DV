@@ -42,11 +42,20 @@
 % Big assumptions rn
 % preposition_DV1,preposition_DV2,V_max,LV_mass_capacity, megarosa mass, radiator mass and
 % power dissipation, everything is BOL
+
+
+
+
+% Verify matrices arent negative or imaginary
+% Annotate
+% Sensitivity studies
+
+
 %% Inputs
 
 
 
-clear
+clearvars -except maindata
 clc
 close all
 
@@ -83,10 +92,10 @@ SMAP = [SMAP_payload;SMAP_departure];
 
 
 
-R_max = [3, 5]; %Range of heliocentric rendevous design pts, AU (User input)
-m_break = [.7,.8]; %Range of mass breakdown (propmass of departure stage/propmass of arrival and departure stages) (User input)
+R_max = [5, 5]; %Range of heliocentric rendevous design pts, AU (User input)
+m_break = [.2,.7]; %Range of mass breakdown (propmass of departure stage/propmass of arrival and departure stages) (User input)
 numR2 = 3; % Simulation size (User input)
-numMass = 5; % Simulation size (User input)
+numMass = 3; % Simulation size (User input)
 
 % prop = [8];
 %                   1 - 0 for chemprop (and impulsive) || Thrust for eprop (and non-impulsive), [N]
@@ -156,11 +165,21 @@ R1 = orbit(1);
 % Simulate a variety of proposed systems
 [DV1, DV2, DT, V, R2, m_break, m_array] = propsystemsim(m1, mass_payload, power_payload, preposition_DV2, prop_scheme, R1, SMAP, R_max,m_break,numR2,numMass);
 V_total = V/V_max;
-
-
+disp('Propulsion systems generated!')
+disp(' ')
 %% Evaluate Prop System Success Rate
 % Determine success rate of each proposed system
-maindata = LoadWholeOrbit(orbitname,12); %load in data to matlab once **If iteration used, comment this line, make sure data loaded before while loop**
+maindata{2,12} = 0;
+if ~isstruct(maindata{1,12})
+    disp('Orbit Data Load Required...')
+    tic
+    maindata = LoadWholeOrbit(orbitname,12); %load in data to matlab once **If iteration used, comment this line, make sure data loaded before while loop**
+    disp('Orbit Data Load Complete!')
+    disp('Time to Load (s):')
+    t = toc;
+    disp(num2str(t))
+    disp(' ')
+end
 PosNum = 0; %set to zero means check every orbit position
 PercentCoverage = zeros(numR2,numMass); %preallocate coverage matrix
 
