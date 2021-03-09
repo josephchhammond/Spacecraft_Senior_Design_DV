@@ -10,12 +10,6 @@
 
 % Develop radiator sizing models                                            Mon 3/1
 
-% Ryan:
-%   - Find margins and factors for all systems                              Mon 3/1
-%   - Add any mass, power draws, and volume additions from SMAP             Mon 3/1
-%   - Run sensitivity studies, determine mission concept                    Fri 3/6
-
-% Delageted Work:
 %   - Orbits: Expand (and fix) lambert factor model (Joey oversees)         Fri 3/6
 %             Expand gravity assist data processing model (Colton oversees) Fri 3/6
 %   - Power: Create new power functions/options (Ryan)                      Mon 3/1
@@ -26,39 +20,23 @@
 %   - GNC: Get better funciton of flyby velocity (Ryan)                     Mon 3/1
 
 
+% Future expansion/logical concerns
+    % Is prepositioning with DV1 OK logically?
+    % Add alt case of fuel dump at arrival instead of departure, run tangentially to other case
+    
+    
 
-
-
-
-
-% Consider coms power draw (distance traveled and what power draw is)
-% Check everything in output window (especially preposition chem mass
-
-
+% Sensitivity studies
+    % Fuel dumpt ISP (eprop)
+    % different thrusters
+        % 2800 at 100kW?
+        % 3500 s isp for krypton
+    % Sensitivity study on dt_max
 
 % Big assumptions rn
 % preposition_DV1,preposition_DV2,V_max,LV_mass_capacity, megarosa mass, radiator mass and
-% power dissipation, everything is BOL
+% power dissipation, everything is BOL, dtmax = .5
 
-
-% 2800 at 100kW?
-% 3500 s isp for krypton
-
-
-% Sensitivity studies
-    % variations in mass (mass to ISO)
-    % variations in mass (jetisoned mass)
-    % launch vehicle prepositioning costs
-    % preposition cost (DV1)
-    % course corrections (DV2)
-    % variation in flyby velocity
-    % limit to 11000kg
-    % 2D VARIATION +- with R3-7? and all mbreak -> big boy!!
-    
-    % 1 XR100 vs 2XR 100 (vs 1.5, 2.5, 3)
-    % margins on chem and eprop saving
-    % Fuel dumpt ISP (eprop)
-    % different thrusters
 %% Inputs
 
 
@@ -128,10 +106,6 @@ R4D_4 = [0, 25, 312, 0, 0, 1.65, 1440, 880,0,312]; % 1 R4D system
 
 % prop_scheme = [departure_DV; arrival_DV]
 prop_scheme = [XR100_2;R4D_4];
-
-% t_burn_max = .5;
-% chem_margin = .02;
-% e_margin = .05;
 
 %% Current Assumptions (function assumptions not included)
 
