@@ -33,7 +33,6 @@ function [Success] = CheckSystem2(OrbitName,PosNum,Vsys,DV1sys,DV2sys,prepositio
     
     chem_margin = .02;
     e_margin = .05;
-    
 
         
     F1 = prop_scheme(1,1); %Departure: F=thrust [N], Isp=specific impulse [s]

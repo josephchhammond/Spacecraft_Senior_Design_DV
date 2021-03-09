@@ -100,10 +100,10 @@ SMAP = [SMAP_payload;SMAP_departure];
 
 
 
-R_max = [3, 7]; %Range of heliocentric rendevous design pts, AU (User input)
+R_max = [5, 5]; %Range of heliocentric rendevous design pts, AU (User input)
 m_break = [.2,.8]; %Range of mass breakdown (propmass of departure stage/propmass of arrival and departure stages) (User input)
-numR2 = 5; % Simulation size (User input)
-numMass = 50; % Simulation size (User input)
+numR2 = 1; % Simulation size (User input)
+numMass = 10; % Simulation size (User input)
 
 % prop = [8];
 %                   1 - 0 for chemprop (and impulsive) || Thrust for eprop (and non-impulsive), [N]
@@ -117,16 +117,21 @@ numMass = 50; % Simulation size (User input)
 %                   9 - Waste Heat from power conversion (.225/.775 times Power required) and thruster heating (function of thruster) [W]
 %                   10 - Fuel dump Isp, [s]
 
-XR100 =   [5,  250, 5000, 100000,0,inf,1000,inf,(100000*.225/.775 + 20000),300]; % XR-100 systems (GUESS IS 1000kg/m^3!!)
-XR100_2 = [10, 500, 5000, 200000,0,inf,1000,inf,(200000*.225/.775 + 40000),300]; %2 XR-100 systems (GUESS IS 1000kg/m^3!!)
+XR100 =   [5,  250, 5000, 100000,0,inf,1000,inf,(100000*.225/.775 + 20000),100]; % XR-100 systems (GUESS IS 1000kg/m^3!!)
+XR100_2 = [10, 500, 5000, 200000,0,inf,1000,inf,(200000*.225/.775 + 40000),100]; %2 XR-100 systems (GUESS IS 1000kg/m^3!!)
+n = 3;
+XR100n =   [5*n,  250*n, 5000, 100000*n,0,inf,1000,inf,(100000*.225/.775 + 20000)*n,100]; % XR-100 systems (GUESS IS 1000kg/m^3!!)
+
 % R4D = [0, 3.63, 312, 46]; % 1 R4D system
 R4D_4 = [0, 25, 312, 0, 0, 1.65, 1440, 880,0,312]; % 1 R4D system
 
 
 % prop_scheme = [departure_DV; arrival_DV]
 prop_scheme = [XR100_2;R4D_4];
-eprop_dump_ISP = 100;
 
+% t_burn_max = .5;
+% chem_margin = .02;
+% e_margin = .05;
 
 %% Current Assumptions (function assumptions not included)
 
